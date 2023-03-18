@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { RequestpostController } from './requestpost.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RequestPost } from './requestpost.entity';
 import { RequestpostService } from './requestpost.service';
+import { RequestpostController } from './requestpost.controller';
 
 @Module({
-  controllers: [RequestpostController],
-  providers: [RequestpostService]
+    imports: [TypeOrmModule.forFeature([RequestPost])],
+    controllers: [RequestpostController],
+    providers: [RequestpostService],
 })
 export class RequestpostModule {}
