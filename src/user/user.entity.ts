@@ -30,10 +30,10 @@ export class User {
     @JoinColumn()
     bank_information: BankInformation;
 
-    @Column()
+    @Column({ unique: true })
     username: string;
 
-    @Column()
+    @Column({ unique: true })
     email: string;
 
     @Column()

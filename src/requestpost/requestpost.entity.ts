@@ -10,7 +10,7 @@ import {
     ManyToOne,
     ManyToMany,
 } from 'typeorm';
-import { DataType } from 'src/common/defaults';
+import { DatasetAccess, DataType } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
 import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
 import { Contribution } from 'src/contribution/contribution.entity';
@@ -53,6 +53,12 @@ export class RequestPost {
 
     @Column({ type: 'money' })
     payment: number;
+
+    @Column({ type: 'date' })
+    deadline: Date
+
+    @Column({ type: 'enum', enum: DatasetAccess, default: DatasetAccess.PRIVATE })
+    access: DatasetAccess
 
     @OneToMany(
         () => Contribution,

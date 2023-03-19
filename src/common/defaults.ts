@@ -20,7 +20,6 @@ export enum DataType {
     AUDIO = 'audio',
     VIDEO = 'video',
     TEXT = 'text',
-    COMPLETE_DATASET = 'complete_dataset',
 }
 
 export enum DatasetAccess {

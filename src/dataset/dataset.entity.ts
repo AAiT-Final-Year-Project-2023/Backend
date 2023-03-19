@@ -41,11 +41,6 @@ export class Dataset {
     @Column()
     dataset_size: number;
 
-    @Column({
-        type: 'enum',
-        enum: DatasetAccess,
-    })
-    access: string;
 
     @Column({ type: 'money' })
     price: number;

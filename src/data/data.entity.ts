@@ -28,8 +28,8 @@ export class Data {
     @Column()
     src: string;
 
-    @Column()
-    label_src: string;
+    @Column({ type: 'json' })
+    label: JSON;
 
     @Column()
     information: string;
