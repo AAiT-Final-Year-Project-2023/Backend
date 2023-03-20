@@ -25,7 +25,7 @@ export class User {
 
     @OneToOne(() => BankInformation, {
         cascade: true,
-        nullable: true
+        nullable: true,
     })
     @JoinColumn()
     bank_information: BankInformation;
@@ -80,13 +80,13 @@ export class User {
 
     @ManyToMany(() => Dataset, (dataset) => dataset.liked_by)
     @JoinTable({
-        name: 'user_dataset_likes'
+        name: 'user_dataset_likes',
     })
     liked_datasets: Dataset[];
 
     @ManyToMany(() => RequestPost, (requestpost) => requestpost.liked_by)
     @JoinTable({
-        name: 'user_requestpost_likes'
+        name: 'user_requestpost_likes',
     })
     liked_request_posts: RequestPost[];
 

@@ -4,5 +4,5 @@ export class UpdateBankinformationDto {
     @IsOptional()
     @IsNotEmpty()
     @IsString()
-    chapa_info: string
+    chapa_info: string;
 }

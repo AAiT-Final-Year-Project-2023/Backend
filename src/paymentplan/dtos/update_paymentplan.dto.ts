@@ -1,21 +1,29 @@
-import { IsAlpha, IsAlphanumeric, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import {
+    IsAlpha,
+    IsAlphanumeric,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsPositive,
+    IsString,
+} from 'class-validator';
 
 export class UpdatePaymentplanDto {
     @IsOptional()
     @IsNotEmpty()
     @IsString()
     @IsAlpha()
-    title: string
+    title: string;
 
     @IsOptional()
     @IsNotEmpty()
     @IsString()
     @IsAlphanumeric()
-    description: string
+    description: string;
 
     @IsOptional()
     @IsNotEmpty()
     @IsNumber()
     @IsPositive()
-    price: number
+    price: number;
 }

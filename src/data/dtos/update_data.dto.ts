@@ -1,21 +1,28 @@
-import { IsAlphanumeric, IsEnum, IsJSON, IsNotEmpty, IsString, Max } from 'class-validator';
-import { DataType } from 'src/common/defaults';
+import {
+    IsAlphanumeric,
+    IsEnum,
+    IsJSON,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    Max,
+} from 'class-validator';
 
-export class UpdateDataDto { 
-    @IsEnum(DataType)
-    datatype: DataType
-
+export class UpdateDataDto {
+    @IsOptional()
     @IsNotEmpty()
     @IsString()
     @Max(100)
-    src: string
+    src: string;
 
+    @IsOptional()
     @IsNotEmpty()
     @IsJSON()
-    label: JSON
+    label: JSON;
 
+    @IsOptional()
     @IsNotEmpty()
     @IsAlphanumeric()
     @Max(100)
-    information: string
+    information: string;
 }

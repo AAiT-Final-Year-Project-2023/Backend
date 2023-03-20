@@ -41,7 +41,6 @@ export class Dataset {
     @Column()
     dataset_size: number;
 
-
     @Column({ type: 'money' })
     price: number;
 

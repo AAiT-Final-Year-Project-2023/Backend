@@ -1,4 +1,17 @@
-import { ArrayMaxSize, IsAlpha, IsAlphanumeric, IsArray, IsEnum, IsInt, IsNotEmpty, IsNumber, IsPositive, IsString, Max, MaxLength } from 'class-validator';
+import {
+    ArrayMaxSize,
+    IsAlpha,
+    IsAlphanumeric,
+    IsArray,
+    IsEnum,
+    IsInt,
+    IsNotEmpty,
+    IsNumber,
+    IsPositive,
+    IsString,
+    Max,
+    MaxLength,
+} from 'class-validator';
 import { DataType } from 'src/common/defaults';
 
 export class CreateDatasetDto {
@@ -6,30 +19,30 @@ export class CreateDatasetDto {
     @IsNotEmpty()
     @IsAlphanumeric()
     @Max(25)
-    title: string
-    
+    title: string;
+
     @IsString()
     @IsNotEmpty()
     @IsAlphanumeric()
     @Max(500)
-    description: string
-    
+    description: string;
+
     @IsArray()
     @IsString({ each: true })
-    @MaxLength(30 , { each: true })
+    @MaxLength(30, { each: true })
     @ArrayMaxSize(10)
-    labels: string[]
+    labels: string[];
 
     @IsEnum(DataType)
-    datatype: DataType
-    
+    datatype: DataType;
+
     @IsNotEmpty()
     @IsInt()
     @IsPositive()
-    dataset_size: number
-    
+    dataset_size: number;
+
     @IsNotEmpty()
     @IsInt()
     @IsPositive()
-    price: number    
+    price: number;
 }

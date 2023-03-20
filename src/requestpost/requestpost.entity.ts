@@ -55,10 +55,14 @@ export class RequestPost {
     payment: number;
 
     @Column({ type: 'date' })
-    deadline: Date
+    deadline: Date;
 
-    @Column({ type: 'enum', enum: DatasetAccess, default: DatasetAccess.PRIVATE })
-    access: DatasetAccess
+    @Column({
+        type: 'enum',
+        enum: DatasetAccess,
+        default: DatasetAccess.PRIVATE,
+    })
+    access: DatasetAccess;
 
     @OneToMany(
         () => Contribution,

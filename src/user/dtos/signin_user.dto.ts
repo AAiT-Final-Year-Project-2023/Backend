@@ -1,26 +1,18 @@
 import {
     IsAlpha,
-    IsEmail,
     IsNotEmpty,
-    IsOptional,
     IsStrongPassword,
     MaxLength,
     MinLength,
 } from 'class-validator';
 
-export class UpdateUserDto {
-    @IsOptional()
+export class SigninUserDto {
     @IsNotEmpty()
     @MinLength(6)
     @MaxLength(18)
     @IsAlpha()
     username: string;
 
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
-
-    @IsOptional()
     @MaxLength(18)
     @IsStrongPassword({
         minLength: 6,
