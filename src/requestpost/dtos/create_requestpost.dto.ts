@@ -5,10 +5,6 @@ export class RequestPostDto {
 
     @IsNotEmpty()
     @IsNumber()
-    user: number
-
-    @IsNotEmpty()
-    @IsNumber()
     payment_plan: number
 
     @IsAlphanumeric()

@@ -3,10 +3,6 @@ import { DataType } from 'src/common/defaults';
 
 export class CreateDatasetDto {
 
-    @IsNotEmpty()
-    @IsNumber()
-    user: number
-
     @IsString()
     @IsNotEmpty()
     @IsAlphanumeric()
