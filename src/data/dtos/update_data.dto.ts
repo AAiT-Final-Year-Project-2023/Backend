@@ -1,7 +1,7 @@
 import { IsAlphanumeric, IsEnum, IsJSON, IsNotEmpty, IsString, Max } from 'class-validator';
 import { DataType } from 'src/common/defaults';
 
-export class CreateDataDto {
+export class UpdateDataDto { 
     @IsEnum(DataType)
     datatype: DataType
 
