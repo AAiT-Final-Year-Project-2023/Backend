@@ -1,6 +1,4 @@
 import {
-    IsAlphanumeric,
-    IsEnum,
     IsJSON,
     IsNotEmpty,
     IsOptional,
@@ -22,7 +20,7 @@ export class UpdateDataDto {
 
     @IsOptional()
     @IsNotEmpty()
-    @IsAlphanumeric()
+    @IsString()
     @Max(100)
     information: string;
 }

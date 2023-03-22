@@ -1,8 +1,7 @@
 import {
     ArrayMaxSize,
-    IsAlphanumeric,
     IsArray,
-    IsDate,
+    IsDateString,
     IsEnum,
     IsInt,
     IsNotEmpty,
@@ -14,13 +13,14 @@ import {
     MinLength,
 } from 'class-validator';
 import { DataType } from 'src/common/defaults';
+import { IsSupportedFileExtension } from 'src/decorators/IsSupportedFileExtension.decorator';
+import { IsValidExtensionForDatatype } from 'src/decorators/IsValidExtensionForDatatype.decorator';
 
 export class CreateRequestPostDto {
     @IsNotEmpty()
     @IsNumber()
     payment_plan: number;
 
-    @IsAlphanumeric()
     @IsNotEmpty()
     @MinLength(10)
     @MaxLength(50)
@@ -47,6 +47,8 @@ export class CreateRequestPostDto {
     datatype: DataType;
 
     // PROBLEM
+    @IsSupportedFileExtension()
+    @IsValidExtensionForDatatype()
     extensions: string[];
 
     // In KBs
@@ -62,6 +64,6 @@ export class CreateRequestPostDto {
     payment: number;
 
     @IsNotEmpty()
-    @IsDate()
-    deadline: Date;
+    @IsDateString()
+    deadline: string;
 }

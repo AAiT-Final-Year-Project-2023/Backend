@@ -12,7 +12,7 @@ import { BankinformationModule } from './bankinformation/bankinformation.module'
 import { DatasetModule } from './dataset/dataset.module';
 import { ContributionModule } from './contribution/contribution.module';
 import { RequestpostModule } from './requestpost/requestpost.module';
-import { FileExtensionsModule } from './file_extension/file_extensions.module';
+import { FileExtensionsModule } from './file_extension/file_extension.module';
 
 // entities
 import { User } from './user/user.entity';
@@ -24,6 +24,8 @@ import { Dataset } from './dataset/dataset.entity';
 import { Contribution } from './contribution/contribution.entity';
 import { RequestPost } from './requestpost/requestpost.entity';
 import { FileExtension } from './file_extension/file_extension.entity';
+import { IsSupportedFileExtensionConstraint } from './validations/IsSupportedFileExtension.constraint';
+import { IsValidExtensionForDatatypeConstraint } from './validations/IsValidExtensionForDatatype.constraint';
 
 @Module({
     imports: [
@@ -46,7 +48,7 @@ import { FileExtension } from './file_extension/file_extension.entity';
                     Dataset,
                     Contribution,
                     RequestPost,
-                    FileExtension
+                    FileExtension,
                 ],
                 synchronize: true,
             }),
@@ -63,6 +65,6 @@ import { FileExtension } from './file_extension/file_extension.entity';
         FileExtensionsModule,
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [AppService, IsSupportedFileExtensionConstraint, IsValidExtensionForDatatypeConstraint],
 })
 export class AppModule {}

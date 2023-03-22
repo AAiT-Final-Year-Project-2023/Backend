@@ -22,7 +22,6 @@ export class UpdateRequestPost {
     payment_plan: number;
 
     @IsOptional()
-    @IsAlphanumeric()
     @IsNotEmpty()
     @MinLength(10)
     @MaxLength(50)

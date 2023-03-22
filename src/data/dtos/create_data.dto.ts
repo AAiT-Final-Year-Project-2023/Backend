@@ -1,5 +1,4 @@
 import {
-    IsAlphanumeric,
     IsEnum,
     IsJSON,
     IsNotEmpty,
@@ -22,7 +21,7 @@ export class CreateDataDto {
     label: JSON;
 
     @IsNotEmpty()
-    @IsAlphanumeric()
+    @IsString()
     @Max(100)
     information: string;
 }

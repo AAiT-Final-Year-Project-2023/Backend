@@ -1,12 +1,9 @@
 import {
     ArrayMaxSize,
-    IsAlpha,
-    IsAlphanumeric,
     IsArray,
     IsEnum,
     IsInt,
     IsNotEmpty,
-    IsNumber,
     IsPositive,
     IsString,
     Max,
@@ -17,13 +14,13 @@ import { DataType } from 'src/common/defaults';
 export class CreateDatasetDto {
     @IsString()
     @IsNotEmpty()
-    @IsAlphanumeric()
+    @IsString()
     @Max(25)
     title: string;
 
     @IsString()
     @IsNotEmpty()
-    @IsAlphanumeric()
+    @IsString()
     @Max(500)
     description: string;
 

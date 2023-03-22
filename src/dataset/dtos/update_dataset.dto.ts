@@ -1,6 +1,5 @@
 import {
     ArrayMaxSize,
-    IsAlphanumeric,
     IsArray,
     IsEnum,
     IsInt,
@@ -17,14 +16,14 @@ export class UpdateDatasetDto {
     @IsOptional()
     @IsString()
     @IsNotEmpty()
-    @IsAlphanumeric()
+    @IsString()
     @Max(25)
     title: string;
 
     @IsOptional()
     @IsString()
     @IsNotEmpty()
-    @IsAlphanumeric()
+    @IsString()
     @Max(500)
     description: string;
 

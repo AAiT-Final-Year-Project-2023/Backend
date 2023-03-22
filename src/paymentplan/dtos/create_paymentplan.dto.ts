@@ -1,10 +1,9 @@
 import {
     IsAlpha,
-    IsAlphanumeric,
+    IsString,
     IsNotEmpty,
     IsNumber,
     IsPositive,
-    IsString,
 } from 'class-validator';
 
 export class CreatePaymentplanDto {
@@ -15,7 +14,7 @@ export class CreatePaymentplanDto {
 
     @IsNotEmpty()
     @IsString()
-    @IsAlphanumeric()
+    @IsString()
     description: string;
 
     @IsNotEmpty()

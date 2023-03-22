@@ -4,12 +4,11 @@ import { DataType } from 'src/common/defaults';
 @Entity()
 export class FileExtension {
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
     @Column({ type: 'enum', enum: DataType })
-    data_type: DataType
+    data_type: DataType;
 
     @Column()
-    extension: string
+    extension: string;
 }
-
