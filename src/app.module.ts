@@ -12,6 +12,8 @@ import { BankinformationModule } from './bankinformation/bankinformation.module'
 import { DatasetModule } from './dataset/dataset.module';
 import { ContributionModule } from './contribution/contribution.module';
 import { RequestpostModule } from './requestpost/requestpost.module';
+import { FileExtensionsModule } from './file_extension/file_extensions.module';
+
 // entities
 import { User } from './user/user.entity';
 import { PaymentPlan } from './paymentplan/paymentplan.entity';
@@ -21,6 +23,7 @@ import { BankInformation } from './bankinformation/bankinformation.entity';
 import { Dataset } from './dataset/dataset.entity';
 import { Contribution } from './contribution/contribution.entity';
 import { RequestPost } from './requestpost/requestpost.entity';
+import { FileExtension } from './file_extension/file_extension.entity';
 
 @Module({
     imports: [
@@ -43,6 +46,7 @@ import { RequestPost } from './requestpost/requestpost.entity';
                     Dataset,
                     Contribution,
                     RequestPost,
+                    FileExtension
                 ],
                 synchronize: true,
             }),
@@ -56,6 +60,7 @@ import { RequestPost } from './requestpost/requestpost.entity';
         DatasetModule,
         ContributionModule,
         RequestpostModule,
+        FileExtensionsModule,
     ],
     controllers: [AppController],
     providers: [AppService],
