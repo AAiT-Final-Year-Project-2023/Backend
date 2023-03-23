@@ -4,15 +4,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 // modules
-import { UsersModule } from './user/users.module';
-import { PaymentplansModule } from './paymentplan/paymentplans.module';
+import { UserModule } from './user/user.module';
+import { PaymentplanModule } from './paymentplan/paymentplan.module';
 import { DataModule } from './data/data.module';
 import { NotificationModule } from './notification/notification.module';
 import { BankinformationModule } from './bankinformation/bankinformation.module';
 import { DatasetModule } from './dataset/dataset.module';
 import { ContributionModule } from './contribution/contribution.module';
 import { RequestpostModule } from './requestpost/requestpost.module';
-import { FileExtensionsModule } from './file_extension/file_extension.module';
+import { FileExtensionModule } from './file_extension/file_extension.module';
 
 // entities
 import { User } from './user/user.entity';
@@ -54,15 +54,15 @@ import { IsValidExtensionForDatatypeConstraint } from './validations/IsValidExte
             }),
             inject: [ConfigService],
         }),
-        UsersModule,
-        PaymentplansModule,
+        UserModule,
+        PaymentplanModule,
         DataModule,
         NotificationModule,
         BankinformationModule,
         DatasetModule,
         ContributionModule,
         RequestpostModule,
-        FileExtensionsModule,
+        FileExtensionModule,
     ],
     controllers: [AppController],
     providers: [

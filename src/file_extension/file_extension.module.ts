@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FileExtension } from './file_extension.entity';
-import { FileExtensionsService } from './file_extension.service';
+import { FileExtensionService } from './file_extension.service';
 import { FileExtensionController } from './file_extension.controller';
 
 @Module({
     imports: [TypeOrmModule.forFeature([FileExtension])],
-    providers: [FileExtensionsService],
+    providers: [FileExtensionService],
     controllers: [FileExtensionController],
-    exports: [FileExtensionsService],
+    exports: [FileExtensionService],
 })
-export class FileExtensionsModule {}
+export class FileExtensionModule {}

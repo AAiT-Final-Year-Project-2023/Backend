@@ -9,13 +9,13 @@ import {
     Delete,
 } from '@nestjs/common';
 import { FileExtension } from './file_extension.entity';
-import { FileExtensionsService } from './file_extension.service';
+import { FileExtensionService } from './file_extension.service';
 import { CreateFileExtensionDto } from './dtos/create_file_extension.dto';
 import { UpdateFileExtensionDto } from './dtos/update_file_extention.dto';
 
 @Controller('file-extension')
 export class FileExtensionController {
-    constructor(private fileExtensionService: FileExtensionsService) {}
+    constructor(private fileExtensionService: FileExtensionService) {}
 
     @Post()
     async createFileExtension(
@@ -44,7 +44,7 @@ export class FileExtensionController {
         return this.fileExtensionService.update(id, body);
     }
 
-    @Delete(":id")
+    @Delete(':id')
     async deleteFileExtension(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<FileExtension> {

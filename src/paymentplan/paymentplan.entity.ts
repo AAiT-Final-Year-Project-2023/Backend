@@ -11,6 +11,12 @@ export class PaymentPlan {
     @Column()
     description: string;
 
+    @Column()
+    disk_size: number;
+
     @Column({ type: 'money' })
     price: number;
+
+    @Column({ type: 'int', default: 0 })
+    discount: number;
 }

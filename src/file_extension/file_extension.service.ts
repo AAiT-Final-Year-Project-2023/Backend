@@ -5,7 +5,7 @@ import { FileExtension } from './file_extension.entity';
 import { CreateFileExtensionDto } from './dtos/create_file_extension.dto';
 
 @Injectable()
-export class FileExtensionsService {
+export class FileExtensionService {
     constructor(
         @InjectRepository(FileExtension)
         private repo: Repository<FileExtension>,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FileExtension } from 'src/file_extension/file_extension.entity';
-import { FileExtensionsService } from 'src/file_extension/file_extension.service';
+import { FileExtensionService } from 'src/file_extension/file_extension.service';
 import {
     ValidatorConstraint,
     ValidatorConstraintInterface,
@@ -13,7 +13,7 @@ import { CreateRequestPostDto } from 'src/requestpost/dtos/create_requestpost.dt
 export class IsValidExtensionForDatatypeConstraint
     implements ValidatorConstraintInterface
 {
-    constructor(private fileExtensionService: FileExtensionsService) {}
+    constructor(private fileExtensionService: FileExtensionService) {}
 
     async validate(extensions: string[], args: ValidationArguments) {
         const object = args.object as CreateRequestPostDto;
