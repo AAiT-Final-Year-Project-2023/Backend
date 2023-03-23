@@ -65,6 +65,10 @@ import { IsValidExtensionForDatatypeConstraint } from './validations/IsValidExte
         FileExtensionsModule,
     ],
     controllers: [AppController],
-    providers: [AppService, IsSupportedFileExtensionConstraint, IsValidExtensionForDatatypeConstraint],
+    providers: [
+        AppService,
+        IsSupportedFileExtensionConstraint,
+        IsValidExtensionForDatatypeConstraint,
+    ],
 })
 export class AppModule {}

@@ -4,10 +4,10 @@ import { RequestpostService } from './requestpost.service';
 
 @Controller('requestpost')
 export class RequestpostController {
-    constructor(private requestPostService: RequestpostService){}
+    constructor(private requestPostService: RequestpostService) {}
 
     @Post()
-    async create(@Body() body: CreateRequestPostDto){
+    async create(@Body() body: CreateRequestPostDto) {
         return body;
     }
 }

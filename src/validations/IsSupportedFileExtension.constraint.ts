@@ -16,7 +16,7 @@ export class IsSupportedFileExtensionConstraint
 
     async validate(extensions: string[], args: ValidationArguments) {
         const supportedExtensionsTypes: FileExtension[] =
-            await this.fileExtensionService.getFileExtensions();
+            await this.fileExtensionService.find();
         let supportedFileExtensions: string[] = [];
         supportedExtensionsTypes.forEach((supportedExtensionType) =>
             supportedFileExtensions.push(supportedExtensionType.extension),

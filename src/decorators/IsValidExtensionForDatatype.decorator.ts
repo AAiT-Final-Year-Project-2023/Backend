@@ -1,7 +1,4 @@
-import {
-    registerDecorator,
-    ValidationOptions,
-} from 'class-validator';
+import { registerDecorator, ValidationOptions } from 'class-validator';
 import { IsValidExtensionForDatatypeConstraint } from 'src/validations/IsValidExtensionForDatatype.constraint';
 
 export function IsValidExtensionForDatatype(

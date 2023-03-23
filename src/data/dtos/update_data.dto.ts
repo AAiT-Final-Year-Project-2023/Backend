@@ -1,10 +1,4 @@
-import {
-    IsJSON,
-    IsNotEmpty,
-    IsOptional,
-    IsString,
-    Max,
-} from 'class-validator';
+import { IsJSON, IsNotEmpty, IsOptional, IsString, Max } from 'class-validator';
 
 export class UpdateDataDto {
     @IsOptional()

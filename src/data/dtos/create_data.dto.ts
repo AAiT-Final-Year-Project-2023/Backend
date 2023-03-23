@@ -1,10 +1,4 @@
-import {
-    IsEnum,
-    IsJSON,
-    IsNotEmpty,
-    IsString,
-    Max,
-} from 'class-validator';
+import { IsEnum, IsJSON, IsNotEmpty, IsString, Max } from 'class-validator';
 import { DataType } from 'src/common/defaults';
 
 export class CreateDataDto {

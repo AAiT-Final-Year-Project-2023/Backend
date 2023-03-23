@@ -1,7 +1,4 @@
-import {
-    registerDecorator,
-    ValidationOptions,
-} from 'class-validator';
+import { registerDecorator, ValidationOptions } from 'class-validator';
 import { IsSupportedFileExtensionConstraint } from 'src/validations/IsSupportedFileExtension.constraint';
 
 export function IsSupportedFileExtension(

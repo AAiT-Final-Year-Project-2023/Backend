@@ -19,10 +19,10 @@ export class IsValidExtensionForDatatypeConstraint
         const object = args.object as CreateRequestPostDto;
 
         const supportedExtensionsTypes: FileExtension[] =
-            await this.fileExtensionService.getFileExtensions();
+            await this.fileExtensionService.find();
         let validExtensionsForType: string[] = [];
-        supportedExtensionsTypes.forEach((supportedExtensionType) =>{
-            if(object.datatype === supportedExtensionType.data_type){
+        supportedExtensionsTypes.forEach((supportedExtensionType) => {
+            if (object.datatype === supportedExtensionType.data_type) {
                 validExtensionsForType.push(supportedExtensionType.extension);
             }
         });
