@@ -22,11 +22,11 @@ export class Contribution {
     user: User;
 
     @ManyToOne(() => RequestPost, (requestpost) => requestpost.contributions)
-    request_post: string;
+    request_post: number;
 
     @OneToOne(() => Data, { cascade: true })
     @JoinColumn()
-    data: Data;
+    data: number;
 
     @Column({
         type: 'enum',
