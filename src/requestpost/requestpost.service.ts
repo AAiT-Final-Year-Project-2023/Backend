@@ -19,8 +19,8 @@ export class RequestpostService {
     }
 
     async find(
-        limit?: number,
         page?: number,
+        limit?: number,
     ): Promise<FindPagination<RequestPost>> {
         const size = this.repo.count();
         const requestPosts = this.repo.find({

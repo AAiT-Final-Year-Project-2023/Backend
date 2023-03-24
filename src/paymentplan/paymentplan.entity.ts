@@ -1,3 +1,4 @@
+import { Dataset } from 'src/dataset/dataset.entity';
 import { RequestPost } from 'src/requestpost/requestpost.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -23,4 +24,7 @@ export class PaymentPlan {
 
     @OneToMany(() => RequestPost, (request_post) => request_post.payment_plan)
     request_posts: RequestPost[];
+
+    @OneToMany(() => Dataset, (dataset) => dataset.payment_plan)
+    datasets: Dataset[];
 }

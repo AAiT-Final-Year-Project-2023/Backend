@@ -7,9 +7,11 @@ import {
     OneToOne,
     JoinColumn,
     ManyToMany,
+    ManyToOne,
 } from 'typeorm';
-import { DataType, DatasetAccess } from 'src/common/defaults';
+import { DataType } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
+import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
 
 @Entity()
 export class Dataset {
@@ -19,6 +21,9 @@ export class Dataset {
     @OneToOne(() => User)
     @JoinColumn()
     user: User;
+
+    @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
+    payment_plan: number;
 
     @Column()
     title: string;
@@ -34,9 +39,6 @@ export class Dataset {
         enum: DataType,
     })
     datatype: string;
-
-    // @Column()
-    // upvotes: number;
 
     @Column()
     dataset_size: number;

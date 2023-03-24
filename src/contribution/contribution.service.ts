@@ -7,18 +7,18 @@ import { CreateContributionDto } from './dtos/create_contribution.dto';
 
 @Injectable()
 export class ContributionService {
-    constructor(@InjectRepository(Contribution) private repo: Repository<Contribution>){}
+    constructor(
+        @InjectRepository(Contribution) private repo: Repository<Contribution>,
+    ) {}
 
-    async create(
-        contribution: CreateContributionDto,
-    ): Promise<Contribution> {
+    async create(contribution: CreateContributionDto): Promise<Contribution> {
         const newContribution = await this.repo.create(contribution);
         return this.repo.save(newContribution);
     }
 
     async find(
-        limit?: number,
         page?: number,
+        limit?: number,
     ): Promise<FindPagination<Contribution>> {
         const size = this.repo.count();
         const requestPosts = this.repo.find({
@@ -35,12 +35,12 @@ export class ContributionService {
     async findRequestPostContributions(
         requestPostId: number,
         limit?: number,
-        page?: number
+        page?: number,
     ): Promise<FindPagination<Contribution>> {
         const size = this.repo.count();
         const requestPosts = this.repo.find({
             where: {
-                request_post: requestPostId
+                request_post: requestPostId,
             },
             skip: (page - 1) * limit,
             take: limit,

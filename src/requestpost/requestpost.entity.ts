@@ -12,7 +12,6 @@ import { DatasetAccess, DataType } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
 import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
 import { Contribution } from 'src/contribution/contribution.entity';
-import { IsNotEmpty } from 'class-validator';
 
 @Entity()
 export class RequestPost {
