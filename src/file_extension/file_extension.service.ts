@@ -22,7 +22,7 @@ export class FileExtensionService {
         return this.repo.find();
     }
 
-    async findOne(id: number): Promise<FileExtension> {
+    async findById(id: number): Promise<FileExtension> {
         return this.repo.findOne({ where: { id } });
     }
 
@@ -30,7 +30,7 @@ export class FileExtensionService {
         id: number,
         attrs: Partial<FileExtension>,
     ): Promise<FileExtension> {
-        const fileExtension = await this.findOne(id);
+        const fileExtension = await this.findById(id);
         if (!fileExtension)
             throw new HttpException(
                 'File Extension not found',
@@ -41,7 +41,7 @@ export class FileExtensionService {
     }
 
     async remove(id: number): Promise<FileExtension> {
-        const fileExtension = await this.findOne(id);
+        const fileExtension = await this.findById(id);
         if (!fileExtension)
             throw new HttpException(
                 'File Extension not found',

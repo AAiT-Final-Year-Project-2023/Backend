@@ -20,7 +20,7 @@ export class PaymentplansService {
         return this.repo.find();
     }
 
-    async findOne(id: number): Promise<PaymentPlan> {
+    async findById(id: number): Promise<PaymentPlan> {
         return this.repo.findOne({ where: { id } });
     }
 
@@ -28,7 +28,7 @@ export class PaymentplansService {
         id: number,
         attrs: Partial<PaymentPlan>,
     ): Promise<PaymentPlan> {
-        const paymentplan = await this.findOne(id);
+        const paymentplan = await this.findById(id);
         if (!paymentplan)
             throw new HttpException(
                 'Payment Plan not found',
@@ -39,7 +39,7 @@ export class PaymentplansService {
     }
 
     async remove(id: number): Promise<PaymentPlan> {
-        const paymentplan = await this.findOne(id);
+        const paymentplan = await this.findById(id);
         if (!paymentplan)
             throw new HttpException(
                 'Payment Plan not found',

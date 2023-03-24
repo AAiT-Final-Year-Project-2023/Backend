@@ -4,8 +4,6 @@ import {
     CreateDateColumn,
     Entity,
     UpdateDateColumn,
-    OneToOne,
-    JoinColumn,
     OneToMany,
     ManyToOne,
     ManyToMany,
@@ -14,6 +12,7 @@ import { DatasetAccess, DataType } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
 import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
 import { Contribution } from 'src/contribution/contribution.entity';
+import { IsNotEmpty } from 'class-validator';
 
 @Entity()
 export class RequestPost {
@@ -23,9 +22,8 @@ export class RequestPost {
     @ManyToOne(() => User, (user) => user.request_posts)
     user: User;
 
-    @OneToOne(() => PaymentPlan)
-    @JoinColumn()
-    payment_plan: PaymentPlan;
+    @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
+    payment_plan: number;
 
     @Column()
     title: string;
@@ -46,10 +44,7 @@ export class RequestPost {
     datatype: string;
 
     @Column()
-    dataset_size: number;
-
-    // @Column()
-    // upvotes: number;
+    data_size: number;
 
     @Column({ type: 'money' })
     payment: number;

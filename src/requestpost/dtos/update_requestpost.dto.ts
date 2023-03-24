@@ -15,7 +15,7 @@ import {
 } from 'class-validator';
 import { DataType } from 'src/common/defaults';
 
-export class UpdateRequestPost {
+export class UpdateRequestPostDto {
     @IsOptional()
     @IsNotEmpty()
     @IsNumber()

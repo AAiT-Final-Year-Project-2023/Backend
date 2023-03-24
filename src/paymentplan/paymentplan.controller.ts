@@ -18,26 +18,24 @@ export class PaymentplanController {
     constructor(private paymentplanService: PaymentplansService) {}
 
     @Post()
-    async createPaymentplan(
-        @Body() body: CreatePaymentplanDto,
-    ): Promise<PaymentPlan> {
+    async create(@Body() body: CreatePaymentplanDto): Promise<PaymentPlan> {
         return this.paymentplanService.create(body);
     }
 
     @Get()
-    async getPaymentplans(): Promise<PaymentPlan[]> {
+    async find(): Promise<PaymentPlan[]> {
         return this.paymentplanService.find();
     }
 
     @Get(':id')
-    async getPaymentplan(
+    async findById(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<PaymentPlan> {
-        return this.paymentplanService.findOne(id);
+        return this.paymentplanService.findById(id);
     }
 
     @Patch(':id')
-    async updatePaymentplan(
+    async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() body: UpdatePaymentplanDto,
     ): Promise<PaymentPlan> {
@@ -45,9 +43,7 @@ export class PaymentplanController {
     }
 
     @Delete(':id')
-    async deletePaymentplan(
-        @Param('id', ParseIntPipe) id: number,
-    ): Promise<PaymentPlan> {
+    async remove(@Param('id', ParseIntPipe) id: number): Promise<PaymentPlan> {
         return this.paymentplanService.remove(id);
     }
 }

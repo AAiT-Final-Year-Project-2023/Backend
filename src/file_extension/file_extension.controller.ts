@@ -18,26 +18,24 @@ export class FileExtensionController {
     constructor(private fileExtensionService: FileExtensionService) {}
 
     @Post()
-    async createFileExtension(
-        @Body() body: CreateFileExtensionDto,
-    ): Promise<FileExtension> {
+    async create(@Body() body: CreateFileExtensionDto): Promise<FileExtension> {
         return this.fileExtensionService.create(body);
     }
 
     @Get()
-    async getFileExtensions(): Promise<FileExtension[]> {
+    async find(): Promise<FileExtension[]> {
         return this.fileExtensionService.find();
     }
 
     @Get(':id')
-    async getFileExtension(
+    async findById(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<FileExtension> {
-        return this.fileExtensionService.findOne(id);
+        return this.fileExtensionService.findById(id);
     }
 
     @Patch(':id')
-    async updateFileExtension(
+    async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() body: UpdateFileExtensionDto,
     ): Promise<FileExtension> {
@@ -45,7 +43,7 @@ export class FileExtensionController {
     }
 
     @Delete(':id')
-    async deleteFileExtension(
+    async remove(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<FileExtension> {
         return this.fileExtensionService.remove(id);

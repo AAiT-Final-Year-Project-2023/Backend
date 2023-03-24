@@ -46,7 +46,6 @@ export class CreateRequestPostDto {
     @IsEnum(DataType)
     datatype: DataType;
 
-    // PROBLEM
     @IsSupportedFileExtension()
     @IsValidExtensionForDatatype()
     extensions: string[];
