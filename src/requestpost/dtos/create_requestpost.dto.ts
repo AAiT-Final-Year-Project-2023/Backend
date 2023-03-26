@@ -15,10 +15,12 @@ import {
 import { DataType } from 'src/common/defaults';
 import { IsSupportedFileExtension } from 'src/decorators/IsSupportedFileExtension.decorator';
 import { IsValidExtensionForDatatype } from 'src/decorators/IsValidExtensionForDatatype.decorator';
+import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator';
 
 export class CreateRequestPostDto {
     @IsNotEmpty()
     @IsNumber()
+    @IsValidPaymentPlan()
     payment_plan: number;
 
     @IsNotEmpty()
