@@ -46,8 +46,11 @@ export class Dataset {
     @Column({ type: 'money' })
     price: number;
 
-    @ManyToMany(() => User, (user) => user.liked_datasets)
-    liked_by: User[];
+    @ManyToMany(() => User, (user) => user.upvoted_datasets)
+    upvoted_by: User[];
+
+    @ManyToMany(() => User, (user) => user.downvoted_datasets)
+    downvoted_by: User[];
 
     @CreateDateColumn()
     created_at: Date;

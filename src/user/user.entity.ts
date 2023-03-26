@@ -78,17 +78,29 @@ export class User {
     @OneToMany(() => RequestPost, (requestpost) => requestpost.user)
     request_posts: RequestPost[];
 
-    @ManyToMany(() => Dataset, (dataset) => dataset.liked_by)
+    @ManyToMany(() => Dataset, (dataset) => dataset.upvoted_by)
     @JoinTable({
-        name: 'user_dataset_likes',
+        name: 'user_dataset_upvotes',
     })
-    liked_datasets: Dataset[];
+    upvoted_datasets: Dataset[];
 
-    @ManyToMany(() => RequestPost, (requestpost) => requestpost.liked_by)
+    @ManyToMany(() => Dataset, (dataset) => dataset.downvoted_by)
     @JoinTable({
-        name: 'user_requestpost_likes',
+        name: 'user_dataset_downvotes',
     })
-    liked_request_posts: RequestPost[];
+    downvoted_datasets: Dataset[];
+
+    @ManyToMany(() => RequestPost, (requestpost) => requestpost.upvoted_by)
+    @JoinTable({
+        name: 'user_requestpost_upvotes',
+    })
+    upvoted_request_posts: RequestPost[];
+
+    @ManyToMany(() => RequestPost, (requestpost) => requestpost.downvoted_by)
+    @JoinTable({
+        name: 'user_requestpost_downvotes',
+    })
+    downvoted_request_posts: RequestPost[];
 
     @CreateDateColumn()
     created_at: Date;

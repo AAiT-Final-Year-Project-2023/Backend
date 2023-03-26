@@ -65,8 +65,11 @@ export class RequestPost {
     )
     contributions: Contribution[];
 
-    @ManyToMany(() => User, (user) => user.liked_request_posts)
-    liked_by: User[];
+    @ManyToMany(() => User, (user) => user.upvoted_request_posts)
+    upvoted_by: User[];
+
+    @ManyToMany(() => User, (user) => user.downvoted_request_posts)
+    downvoted_by: User[];
 
     @CreateDateColumn()
     created_at: Date;
