@@ -70,7 +70,7 @@ import { IsValidExtensionForDatatypeConstraint } from './validations/IsValidExte
         AppService,
         IsSupportedFileExtensionConstraint,
         IsValidExtensionForDatatypeConstraint,
-        IsValidPaymentPlanConstraint
+        IsValidPaymentPlanConstraint,
     ],
 })
 export class AppModule {}
