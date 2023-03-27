@@ -32,12 +32,12 @@ export class DatasetService {
         };
     }
 
-    async findById(id: number): Promise<Dataset> {
+    async findById(id: string): Promise<Dataset> {
         return this.repo.findOne({ where: { id } });
     }
 
     async update(
-        id: number,
+        id: string,
         attrs: Partial<UpdateDatasetDto>,
     ): Promise<Dataset> {
         const dataset = await this.findById(id);
@@ -47,7 +47,7 @@ export class DatasetService {
         return this.repo.save(dataset);
     }
 
-    async remove(id: number): Promise<Dataset> {
+    async remove(id: string): Promise<Dataset> {
         const dataset = await this.findById(id);
         if (!dataset)
             throw new HttpException('Dataset not found', HttpStatus.NOT_FOUND);

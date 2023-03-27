@@ -13,7 +13,7 @@ export class IsValidPaymentPlanConstraint
 {
     constructor(private paymentPlanService: PaymentplansService) {}
 
-    async validate(payment_plan: number, args: ValidationArguments) {
+    async validate(payment_plan: string, args: ValidationArguments) {
         const plan = await this.paymentPlanService.findById(payment_plan);
         return plan !== null;
     }

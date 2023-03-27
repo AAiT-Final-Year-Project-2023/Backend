@@ -34,12 +34,12 @@ export class RequestpostService {
         };
     }
 
-    async findById(id: number): Promise<RequestPost> {
+    async findById(id: string): Promise<RequestPost> {
         return this.repo.findOne({ where: { id } });
     }
 
     async update(
-        id: number,
+        id: string,
         attrs: Partial<UpdateRequestPostDto>,
     ): Promise<RequestPost> {
         const requestPost = await this.findById(id);
@@ -52,7 +52,7 @@ export class RequestpostService {
         return this.repo.save(requestPost);
     }
 
-    async remove(id: number): Promise<RequestPost> {
+    async remove(id: string): Promise<RequestPost> {
         const requestPost = await this.findById(id);
         if (!requestPost)
             throw new HttpException(

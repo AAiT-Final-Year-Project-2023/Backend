@@ -4,9 +4,9 @@ import {
     Delete,
     Get,
     Param,
-    ParseIntPipe,
     Patch,
     Post,
+    ParseUUIDPipe,
 } from '@nestjs/common';
 import { PaymentPlan } from './paymentplan.entity';
 import { CreatePaymentplanDto } from './dtos/create_paymentplan.dto';
@@ -29,21 +29,21 @@ export class PaymentplanController {
 
     @Get(':id')
     async findById(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
     ): Promise<PaymentPlan> {
         return this.paymentplanService.findById(id);
     }
 
     @Patch(':id')
     async update(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdatePaymentplanDto,
     ): Promise<PaymentPlan> {
         return this.paymentplanService.update(id, body);
     }
 
     @Delete(':id')
-    async remove(@Param('id', ParseIntPipe) id: number): Promise<PaymentPlan> {
+    async remove(@Param('id', ParseUUIDPipe) id: string): Promise<PaymentPlan> {
         return this.paymentplanService.remove(id);
     }
 }

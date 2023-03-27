@@ -5,6 +5,7 @@ import {
     Get,
     Param,
     ParseIntPipe,
+    ParseUUIDPipe,
     Patch,
     Post,
     Query,
@@ -24,7 +25,7 @@ export class ContributionController {
 
     @Get()
     async find(
-        @Query('requestPostId', ParseIntPipe) requestPostId?: number,
+        @Query('requestPostId', ParseUUIDPipe) requestPostId?: string,
         @Query('page', ParseIntPipe) page?: number,
         @Query('limit') limit?: number,
     ) {
@@ -38,20 +39,20 @@ export class ContributionController {
     }
 
     @Get(':id')
-    async findById(@Param('id', ParseIntPipe) id: number) {
+    async findById(@Param('id', ParseUUIDPipe) id: string) {
         return this.contributionService.findById(id);
     }
 
     @Patch(':id')
     async update(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateContributionDto,
     ) {
         return this.contributionService.update(id, body);
     }
 
     @Delete(':id')
-    async remove(@Param('id', ParseIntPipe) id: number) {
+    async remove(@Param('id', ParseUUIDPipe) id: string) {
         return this.contributionService.remove(id);
     }
 }

@@ -3,11 +3,12 @@ import {
     Post,
     Body,
     Get,
-    ParseIntPipe,
     Patch,
     Param,
     Delete,
     Query,
+    ParseIntPipe,
+    ParseUUIDPipe,
 } from '@nestjs/common';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
@@ -32,20 +33,20 @@ export class RequestpostController {
     }
 
     @Get(':id')
-    async findById(@Param('id', ParseIntPipe) id: number) {
+    async findById(@Param('id', ParseUUIDPipe) id: string) {
         return this.requestPostService.findById(id);
     }
 
     @Patch(':id')
     async update(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateRequestPostDto,
     ) {
         return this.requestPostService.update(id, body);
     }
 
     @Delete(':id')
-    async remove(@Param('id', ParseIntPipe) id: number) {
+    async remove(@Param('id', ParseUUIDPipe) id: string) {
         return this.remove(id);
     }
 }

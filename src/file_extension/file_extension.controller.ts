@@ -7,6 +7,7 @@ import {
     ParseIntPipe,
     Patch,
     Delete,
+    ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileExtension } from './file_extension.entity';
 import { FileExtensionService } from './file_extension.service';
@@ -29,14 +30,14 @@ export class FileExtensionController {
 
     @Get(':id')
     async findById(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
     ): Promise<FileExtension> {
         return this.fileExtensionService.findById(id);
     }
 
     @Patch(':id')
     async update(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateFileExtensionDto,
     ): Promise<FileExtension> {
         return this.fileExtensionService.update(id, body);
@@ -44,7 +45,7 @@ export class FileExtensionController {
 
     @Delete(':id')
     async remove(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
     ): Promise<FileExtension> {
         return this.fileExtensionService.remove(id);
     }

@@ -8,8 +8,8 @@ import {
 
 @Entity()
 export class BankInformation {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @Column()
     chapa_info: string;

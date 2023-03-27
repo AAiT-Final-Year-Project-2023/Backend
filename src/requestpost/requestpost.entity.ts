@@ -15,14 +15,14 @@ import { Contribution } from 'src/contribution/contribution.entity';
 
 @Entity()
 export class RequestPost {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @ManyToOne(() => User, (user) => user.request_posts)
     user: User;
 
     @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
-    payment_plan: number;
+    payment_plan: string;
 
     @Column()
     title: string;

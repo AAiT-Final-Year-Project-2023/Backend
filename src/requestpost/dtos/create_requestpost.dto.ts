@@ -8,6 +8,7 @@ import {
     IsNumber,
     IsPositive,
     IsString,
+    IsUUID,
     Length,
     MaxLength,
     MinLength,
@@ -19,9 +20,9 @@ import { IsValidExtensionForDatatype } from 'src/decorators/IsValidExtensionForD
 
 export class CreateRequestPostDto {
     @IsNotEmpty()
-    @IsNumber()
+    @IsUUID()
     @IsValidPaymentPlan()
-    payment_plan: number;
+    payment_plan: string;
 
     @IsNotEmpty()
     @MinLength(10)

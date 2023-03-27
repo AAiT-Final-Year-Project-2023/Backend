@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateContributionDto {
     @IsNotEmpty()
-    @IsNumber()
-    request_post: number;
+    @IsUUID()
+    request_post: string;
 
     @IsNotEmpty()
-    @IsNumber()
-    data: number;
+    @IsUUID()
+    data: string;
 }

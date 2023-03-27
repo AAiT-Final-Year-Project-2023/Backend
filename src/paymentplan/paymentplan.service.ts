@@ -20,12 +20,12 @@ export class PaymentplansService {
         return this.repo.find();
     }
 
-    async findById(id: number): Promise<PaymentPlan> {
+    async findById(id: string): Promise<PaymentPlan> {
         return this.repo.findOne({ where: { id } });
     }
 
     async update(
-        id: number,
+        id: string,
         attrs: Partial<PaymentPlan>,
     ): Promise<PaymentPlan> {
         const paymentplan = await this.findById(id);
@@ -38,7 +38,7 @@ export class PaymentplansService {
         return this.repo.save(paymentplan);
     }
 
-    async remove(id: number): Promise<PaymentPlan> {
+    async remove(id: string): Promise<PaymentPlan> {
         const paymentplan = await this.findById(id);
         if (!paymentplan)
             throw new HttpException(

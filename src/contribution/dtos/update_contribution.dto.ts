@@ -1,13 +1,13 @@
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class UpdateContributionDto {
     @IsOptional()
     @IsNotEmpty()
-    @IsNumber()
-    request_post: number;
+    @IsUUID()
+    request_post: string;
 
     @IsOptional()
     @IsNotEmpty()
-    @IsNumber()
-    data: number;
+    @IsUUID()
+    data: string;
 }

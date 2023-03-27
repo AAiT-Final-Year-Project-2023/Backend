@@ -20,7 +20,7 @@ import { BankInformation } from 'src/bankinformation/bankinformation.entity';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @OneToOne(() => BankInformation, {

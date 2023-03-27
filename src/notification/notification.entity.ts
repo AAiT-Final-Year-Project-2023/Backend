@@ -12,8 +12,8 @@ import {
 
 @Entity()
 export class Notification {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @ManyToOne(() => User, (user) => user.notifications)
     user: User;

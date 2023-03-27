@@ -22,12 +22,12 @@ export class FileExtensionService {
         return this.repo.find();
     }
 
-    async findById(id: number): Promise<FileExtension> {
+    async findById(id: string): Promise<FileExtension> {
         return this.repo.findOne({ where: { id } });
     }
 
     async update(
-        id: number,
+        id: string,
         attrs: Partial<FileExtension>,
     ): Promise<FileExtension> {
         const fileExtension = await this.findById(id);
@@ -40,7 +40,7 @@ export class FileExtensionService {
         return this.repo.save(fileExtension);
     }
 
-    async remove(id: number): Promise<FileExtension> {
+    async remove(id: string): Promise<FileExtension> {
         const fileExtension = await this.findById(id);
         if (!fileExtension)
             throw new HttpException(

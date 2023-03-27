@@ -33,7 +33,7 @@ export class ContributionService {
     }
 
     async findRequestPostContributions(
-        requestPostId: number,
+        requestPostId: string,
         limit?: number,
         page?: number,
     ): Promise<FindPagination<Contribution>> {
@@ -52,12 +52,12 @@ export class ContributionService {
         };
     }
 
-    async findById(id: number): Promise<Contribution> {
+    async findById(id: string): Promise<Contribution> {
         return this.repo.findOne({ where: { id } });
     }
 
     async update(
-        id: number,
+        id: string,
         attrs: Partial<Contribution>,
     ): Promise<Contribution> {
         const contribution = await this.findById(id);
@@ -70,7 +70,7 @@ export class ContributionService {
         return this.repo.save(contribution);
     }
 
-    async remove(id: number): Promise<Contribution> {
+    async remove(id: string): Promise<Contribution> {
         const contribution = await this.findById(id);
         if (!contribution)
             throw new HttpException(

@@ -3,8 +3,8 @@ import { DataType } from 'src/common/defaults';
 
 @Entity()
 export class FileExtension {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @Column({ type: 'enum', enum: DataType })
     data_type: DataType;

@@ -1,6 +1,5 @@
 import {
     ArrayMaxSize,
-    IsAlphanumeric,
     IsArray,
     IsEnum,
     IsInt,
@@ -9,17 +8,20 @@ import {
     IsOptional,
     IsPositive,
     IsString,
+    IsUUID,
     Length,
     MaxLength,
     MinLength,
 } from 'class-validator';
 import { DataType } from 'src/common/defaults';
+import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator';
 
 export class UpdateRequestPostDto {
     @IsOptional()
     @IsNotEmpty()
-    @IsNumber()
-    payment_plan: number;
+    @IsUUID()
+    @IsValidPaymentPlan()
+    payment_plan: string;
 
     @IsOptional()
     @IsNotEmpty()

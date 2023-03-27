@@ -15,18 +15,18 @@ import { Data } from 'src/data/data.entity';
 
 @Entity()
 export class Contribution {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @ManyToOne(() => User, (user) => user.contributions)
     user: User;
 
     @ManyToOne(() => RequestPost, (requestpost) => requestpost.contributions)
-    request_post: number;
+    request_post: string;
 
     @OneToOne(() => Data, { cascade: true })
     @JoinColumn()
-    data: number;
+    data: string;
 
     @Column({
         type: 'enum',

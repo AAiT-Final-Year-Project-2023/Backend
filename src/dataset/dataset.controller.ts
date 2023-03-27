@@ -5,6 +5,7 @@ import {
     Get,
     Param,
     ParseIntPipe,
+    ParseUUIDPipe,
     Patch,
     Post,
     Query,
@@ -31,20 +32,20 @@ export class DatasetController {
     }
 
     @Get(':id')
-    findById(@Param('id', ParseIntPipe) id: number) {
+    findById(@Param('id', ParseUUIDPipe) id: string) {
         return this.datasetService.findById(id);
     }
 
     @Patch(':id')
     update(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateDatasetDto,
     ) {
         return this.datasetService.update(id, body);
     }
 
     @Delete(':id')
-    delete(@Param('id', ParseIntPipe) id: number) {
+    delete(@Param('id', ParseUUIDPipe) id: string) {
         return this.datasetService.remove(id);
     }
 }

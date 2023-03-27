@@ -12,8 +12,8 @@ import {
 
 @Entity()
 export class Data {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @OneToOne(() => Dataset)
     @JoinColumn()

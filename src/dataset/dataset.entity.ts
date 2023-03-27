@@ -15,15 +15,15 @@ import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
 
 @Entity()
 export class Dataset {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @OneToOne(() => User)
     @JoinColumn()
     user: User;
 
     @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
-    payment_plan: number;
+    payment_plan: PaymentPlan;
 
     @Column()
     title: string;
