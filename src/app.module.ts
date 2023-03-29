@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-// modules
+import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { PaymentplanModule } from './paymentplan/paymentplan.module';
 import { DataModule } from './data/data.module';
@@ -13,8 +13,6 @@ import { DatasetModule } from './dataset/dataset.module';
 import { ContributionModule } from './contribution/contribution.module';
 import { RequestpostModule } from './requestpost/requestpost.module';
 import { FileExtensionModule } from './file_extension/file_extension.module';
-
-// entities
 import { User } from './user/user.entity';
 import { PaymentPlan } from './paymentplan/paymentplan.entity';
 import { Data } from './data/data.entity';
@@ -27,7 +25,8 @@ import { FileExtension } from './file_extension/file_extension.entity';
 import { IsValidPaymentPlanConstraint } from './validations/IsValidPaymentPlan.constraint';
 import { IsSupportedFileExtensionConstraint } from './validations/IsSupportedFileExtension.constraint';
 import { IsValidExtensionForDatatypeConstraint } from './validations/IsValidExtensionForDatatype.constraint';
-import { AuthModule } from './auth/auth.module';
+import { IsAvailableEmailConstraint } from './validations/IsAvailableEmail.constraint';
+import { IsAvailableUsernameConstraint } from './validations/IsAvailableUsername.constraint';
 
 @Module({
     imports: [
@@ -58,6 +57,7 @@ import { AuthModule } from './auth/auth.module';
             }),
             inject: [ConfigService],
         }),
+        AuthModule,
         UserModule,
         PaymentplanModule,
         DataModule,
@@ -67,7 +67,6 @@ import { AuthModule } from './auth/auth.module';
         ContributionModule,
         RequestpostModule,
         FileExtensionModule,
-        AuthModule,
     ],
     controllers: [AppController],
     providers: [
@@ -75,6 +74,8 @@ import { AuthModule } from './auth/auth.module';
         IsSupportedFileExtensionConstraint,
         IsValidExtensionForDatatypeConstraint,
         IsValidPaymentPlanConstraint,
+        IsAvailableEmailConstraint,
+        IsAvailableUsernameConstraint
     ],
 })
 export class AppModule {}

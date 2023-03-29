@@ -30,4 +30,12 @@ export class UserService {
             },
         });
     }
+
+    async findByEmail(email: string): Promise<User> {
+        return this.repo.findOne({
+            where: {
+                email,
+            },
+        });
+    }
 }

@@ -7,6 +7,8 @@ import {
     MaxLength,
     MinLength,
 } from 'class-validator';
+import { IsAvailableEmail } from 'src/decorators/IsAvailableEmail.decorator';
+import { IsAvailableUsername } from 'src/decorators/IsAvailableUsername.decorator';
 
 export class UpdateUserDto {
     @IsOptional()
@@ -14,10 +16,12 @@ export class UpdateUserDto {
     @MinLength(6)
     @MaxLength(18)
     @IsAlpha()
+    @IsAvailableUsername()
     username: string;
 
     @IsEmail()
     @IsNotEmpty()
+    @IsAvailableEmail()
     email: string;
 
     @IsOptional()
