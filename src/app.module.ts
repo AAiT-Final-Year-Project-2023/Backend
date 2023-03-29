@@ -27,10 +27,13 @@ import { FileExtension } from './file_extension/file_extension.entity';
 import { IsValidPaymentPlanConstraint } from './validations/IsValidPaymentPlan.constraint';
 import { IsSupportedFileExtensionConstraint } from './validations/IsSupportedFileExtension.constraint';
 import { IsValidExtensionForDatatypeConstraint } from './validations/IsValidExtensionForDatatype.constraint';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
-        ConfigModule.forRoot(),
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: (configService: ConfigService) => ({
@@ -64,6 +67,7 @@ import { IsValidExtensionForDatatypeConstraint } from './validations/IsValidExte
         ContributionModule,
         RequestpostModule,
         FileExtensionModule,
+        AuthModule,
     ],
     controllers: [AppController],
     providers: [
