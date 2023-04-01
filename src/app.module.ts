@@ -27,6 +27,9 @@ import { IsSupportedFileExtensionConstraint } from './validations/IsSupportedFil
 import { IsValidExtensionForDatatypeConstraint } from './validations/IsValidExtensionForDatatype.constraint';
 import { IsAvailableEmailConstraint } from './validations/IsAvailableEmail.constraint';
 import { IsAvailableUsernameConstraint } from './validations/IsAvailableUsername.constraint';
+import { RoleGuard } from './guards/role.guard';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
     imports: [
@@ -75,7 +78,16 @@ import { IsAvailableUsernameConstraint } from './validations/IsAvailableUsername
         IsValidExtensionForDatatypeConstraint,
         IsValidPaymentPlanConstraint,
         IsAvailableEmailConstraint,
-        IsAvailableUsernameConstraint
+        IsAvailableUsernameConstraint,
+        {
+            provide: APP_GUARD,
+            useClass: JwtAuthGuard,
+        },
+        {
+            provide: APP_GUARD,
+            useClass: RoleGuard,
+        },
+        
     ],
 })
 export class AppModule {}

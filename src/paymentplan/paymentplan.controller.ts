@@ -7,23 +7,28 @@ import {
     Patch,
     Post,
     ParseUUIDPipe,
+    Res,
+    Req,
 } from '@nestjs/common';
 import { PaymentPlan } from './paymentplan.entity';
 import { CreatePaymentplanDto } from './dtos/create_paymentplan.dto';
 import { UpdatePaymentplanDto } from './dtos/update_paymentplan.dto';
 import { PaymentplansService } from './paymentplan.service';
+import { Role } from 'src/decorators/roles.decorator';
+import { UserRole } from 'src/common/defaults';
 
 @Controller('paymentplan')
 export class PaymentplanController {
     constructor(private paymentplanService: PaymentplansService) {}
 
+    @Role(UserRole.ADMIN)
     @Post()
     async create(@Body() body: CreatePaymentplanDto): Promise<PaymentPlan> {
         return this.paymentplanService.create(body);
     }
 
     @Get()
-    async find(): Promise<PaymentPlan[]> {
+    async find(@Req() req:any): Promise<PaymentPlan[]> {
         return this.paymentplanService.find();
     }
 
