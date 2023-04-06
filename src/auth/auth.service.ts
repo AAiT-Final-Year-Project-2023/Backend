@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/user/dtos/create_user.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +13,10 @@ export class AuthService {
         private jwtService: JwtService,
     ) {}
 
-    async validateUser(username: string, password: string): Promise<Omit<User, 'password'>> {
+    async validateUser(
+        username: string,
+        password: string,
+    ): Promise<Omit<User, 'password'>> {
         const user = await this.userService.findByUsername(username);
         const isMatch = this.isMatch(password, user.password);
 
@@ -34,7 +38,11 @@ export class AuthService {
     }
 
     async signin(user: Omit<User, 'password'>) {
-        const payload = { username: user.username, sub: user.id, role: user.role };
+        const payload = {
+            username: user.username,
+            sub: user.id,
+            role: user.role,
+        };
         return {
             access_token: this.jwtService.sign(payload),
         };
@@ -44,5 +52,14 @@ export class AuthService {
         user.password = await this.hash(user.password);
         const newUser = await this.userService.create(user);
         return this.signin(newUser);
+    }
+
+    async googleSignin(req: Request) {
+        if (!req.user) return 'No user from google';
+        
+        return {
+            message: 'User information from google',
+            user: req.user,
+        };
     }
 }

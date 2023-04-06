@@ -30,11 +30,16 @@ import { IsAvailableUsernameConstraint } from './validations/IsAvailableUsername
 import { RoleGuard } from './guards/role.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { GoogleStrategy } from './auth/strategies/google.strategy';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
+        }),
+        MulterModule.register({
+            dest: './uploads',
         }),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
@@ -87,7 +92,6 @@ import { APP_GUARD } from '@nestjs/core';
             provide: APP_GUARD,
             useClass: RoleGuard,
         },
-        
     ],
 })
 export class AppModule {}

@@ -34,7 +34,6 @@ export class CreateRequestPostDto {
     @Length(50, 500)
     description: string;
 
-    // ?? WHYYYYY
     @IsArray()
     @IsString({ each: true })
     @MaxLength(30, { each: true })

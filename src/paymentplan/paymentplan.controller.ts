@@ -7,8 +7,6 @@ import {
     Patch,
     Post,
     ParseUUIDPipe,
-    Res,
-    Req,
 } from '@nestjs/common';
 import { PaymentPlan } from './paymentplan.entity';
 import { CreatePaymentplanDto } from './dtos/create_paymentplan.dto';
@@ -28,7 +26,7 @@ export class PaymentplanController {
     }
 
     @Get()
-    async find(@Req() req:any): Promise<PaymentPlan[]> {
+    async find(): Promise<PaymentPlan[]> {
         return this.paymentplanService.find();
     }
 

@@ -14,6 +14,8 @@ import {
     MinLength,
 } from 'class-validator';
 import { DataType } from 'src/common/defaults';
+import { IsSupportedFileExtension } from 'src/decorators/IsSupportedFileExtension.decorator';
+import { IsValidExtensionForDatatype } from 'src/decorators/IsValidExtensionForDatatype.decorator';
 import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator';
 
 export class UpdateRequestPostDto {
@@ -35,7 +37,6 @@ export class UpdateRequestPostDto {
     @Length(50, 500)
     description: string;
 
-    // ?? WHYYYYY
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
@@ -53,8 +54,9 @@ export class UpdateRequestPostDto {
     @IsEnum(DataType)
     datatype: DataType;
 
-    // PROBLEM
     @IsOptional()
+    @IsSupportedFileExtension()
+    @IsValidExtensionForDatatype()
     extensions: string[];
 
     // In KBs
