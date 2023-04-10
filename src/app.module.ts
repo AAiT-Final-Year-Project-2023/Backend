@@ -30,8 +30,13 @@ import { IsAvailableUsernameConstraint } from './validations/IsAvailableUsername
 import { RoleGuard } from './guards/role.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
-import { GoogleStrategy } from './auth/strategies/google.strategy';
 import { MulterModule } from '@nestjs/platform-express';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { EmailService } from './email/email.service';
+import { EmailModule } from './email/email.module';
+import { UserExistsConstraint } from './validations/UserExists.constraint';
+import { IsValidEmailConstraint } from './validations/IsValidEmail.constraint';
 
 @Module({
     imports: [
@@ -65,6 +70,31 @@ import { MulterModule } from '@nestjs/platform-express';
             }),
             inject: [ConfigService],
         }),
+        MailerModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => ({
+                transport: {
+                    service: 'gmail',
+                    port: 587,
+                    starttls: {
+                        enable: true,
+                    },
+                    secureConnection: true,
+                    auth: {
+                        user: configService.get<'string'>('EMAIL_USER'),
+                        pass: configService.get<'string'>('EMAIL_PASSWORD'),
+                    },
+                },
+                template: {
+                    dir: process.cwd() + '/src/templates/',
+                    adapter: new HandlebarsAdapter(),
+                    options: {
+                        strict: true,
+                    },
+                },
+            }),
+            inject: [ConfigService],
+        }),
         AuthModule,
         UserModule,
         PaymentplanModule,
@@ -75,15 +105,19 @@ import { MulterModule } from '@nestjs/platform-express';
         ContributionModule,
         RequestpostModule,
         FileExtensionModule,
+        EmailModule,
     ],
     controllers: [AppController],
     providers: [
         AppService,
+        EmailService,
         IsSupportedFileExtensionConstraint,
         IsValidExtensionForDatatypeConstraint,
         IsValidPaymentPlanConstraint,
         IsAvailableEmailConstraint,
         IsAvailableUsernameConstraint,
+        UserExistsConstraint,
+        IsValidEmailConstraint,
         {
             provide: APP_GUARD,
             useClass: JwtAuthGuard,

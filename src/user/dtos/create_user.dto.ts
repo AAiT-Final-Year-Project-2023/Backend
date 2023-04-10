@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { IsAvailableEmail } from 'src/decorators/IsAvailableEmail.decorator';
 import { IsAvailableUsername } from 'src/decorators/IsAvailableUsername.decorator';
+import { IsValidEmail } from 'src/decorators/IsValidEmail.decorator';
 
 export class CreateUserDto {
     @IsNotEmpty()
@@ -19,6 +20,7 @@ export class CreateUserDto {
 
     @IsEmail()
     @IsNotEmpty()
+    // @IsValidEmail()
     @IsAvailableEmail()
     email: string;
 

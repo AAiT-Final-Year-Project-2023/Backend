@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create_user.dto';
@@ -37,5 +37,25 @@ export class UserService {
                 email,
             },
         });
+    }
+
+    async update(
+        id: string,
+        attrs: Partial<User>,
+    ): Promise<Omit<User, 'password'>> {
+        const user = await this.findById(id);
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        Object.assign(user, attrs);
+        const newUser = await this.repo.save(user);
+        const { password, ...rest } = newUser;
+        return rest;
+    }
+
+    async remove(id: string): Promise<Omit<User, 'password'>> {
+        const user = await this.findById(id);
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        return this.repo.remove(user);
     }
 }

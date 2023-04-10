@@ -62,6 +62,27 @@ export class User {
     @Column({ default: 0 })
     total_earnings: number;
 
+    @Column({ default: false })
+    email_is_valid: boolean;
+
+    @Column({ nullable: true })
+    email_verification_code: string;
+
+    @Column({ nullable: true })
+    email_verification_code_expiration: Date;
+
+    @Column({ nullable: true })
+    new_password: string;
+
+    @Column({ nullable: true })
+    password_change_verification_code: string;
+
+    @Column({ nullable: true })
+    password_change_code_expiration: Date;
+
+    @Column({ default: false })
+    google_authenticated: boolean;
+
     @Column('varchar', { array: true, default: [] })
     @ArrayMaxSize(3)
     // relationship ????

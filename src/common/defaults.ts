@@ -26,3 +26,9 @@ export enum DatasetAccess {
     PRIVATE = 'private',
     PUBLIC = 'public',
 }
+
+// in minutes
+export enum CodeExpiration {
+    email_verification = 5,
+    change_password = 5,
+}
