@@ -1,4 +1,4 @@
-import { UserRole } from "./defaults";
+import { UserRole } from './defaults';
 
 export interface FindPagination<T> {
     results: Promise<T[]>;
@@ -25,7 +25,7 @@ export interface Verification {
 }
 
 export interface AuthorizedUserData {
-    userId: string,
-    username: string,
-    role: UserRole
+    userId: string;
+    username: string;
+    role: UserRole;
 }

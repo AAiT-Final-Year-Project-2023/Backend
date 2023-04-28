@@ -25,7 +25,7 @@ export class AuthService {
         password: string,
     ): Promise<Omit<User, 'password'>> {
         const user = await this.userService.findByUsername(username);
-        const isMatch = this.isMatch(password, user.password);
+        const isMatch = await this.isMatch(password, user.password);
 
         if (user && isMatch) {
             const { password, ...rest } = user;
@@ -119,10 +119,6 @@ export class AuthService {
                 HttpStatus.NOT_ACCEPTABLE,
             );
         }
-
-        console.log("code: ", data.code);
-        console.log("code: ", data.code);
-
 
         if (data.code !== user.email_verification_code) {
             throw new HttpException(
@@ -267,6 +263,6 @@ export class AuthService {
             password_change_code_expiration: null,
         });
 
-        return "new password successfully set";
+        return 'new password successfully set';
     }
 }
