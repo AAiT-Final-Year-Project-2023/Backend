@@ -27,5 +27,5 @@ export interface Verification {
 export interface AuthorizedUserData {
     userId: string;
     username: string;
-    role: UserRole;
+    role: [UserRole];
 }

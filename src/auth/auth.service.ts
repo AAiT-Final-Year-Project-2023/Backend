@@ -25,9 +25,10 @@ export class AuthService {
         password: string,
     ): Promise<Omit<User, 'password'>> {
         const user = await this.userService.findByUsername(username);
+        if (!user) return null;
         const isMatch = await this.isMatch(password, user.password);
 
-        if (user && isMatch) {
+        if (isMatch) {
             const { password, ...rest } = user;
             return rest;
         }
@@ -58,6 +59,7 @@ export class AuthService {
         const newUser = await this.userService.create(newUserDetails);
         await this.userService.update(newUser.id, {
             google_authenticated: true,
+            email_is_valid: true
         });
 
         return await this.signin(newUser);
@@ -67,7 +69,7 @@ export class AuthService {
         const payload = {
             username: user.username,
             sub: user.id,
-            role: user.role,
+            roles: user.roles,
         };
         return {
             access_token: this.jwtService.sign(payload),

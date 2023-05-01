@@ -9,18 +9,27 @@ import {
     Patch,
     Post,
     Query,
+    UploadedFile,
+    UseInterceptors,
 } from '@nestjs/common';
 import { CreateContributionDto } from './dtos/create_contribution.dto';
 import { UpdateContributionDto } from './dtos/update_contribution.dto';
 import { ContributionService } from './contribution.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('contribution')
 export class ContributionController {
     constructor(private contributionService: ContributionService) {}
 
+    // name the file like: post_request_id/user_id+timestamp
     @Post()
-    async create(@Body() body: CreateContributionDto) {
-        return this.contributionService.create(body);
+    @UseInterceptors(FileInterceptor('file'))
+    async create(
+        @UploadedFile() file: Express.Multer.File,
+        @Body() body: CreateContributionDto,
+    ) {
+        console.log(file);
+        // return this.contributionService.create(body);
     }
 
     @Get()

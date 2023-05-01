@@ -12,14 +12,14 @@ import { PaymentPlan } from './paymentplan.entity';
 import { CreatePaymentplanDto } from './dtos/create_paymentplan.dto';
 import { UpdatePaymentplanDto } from './dtos/update_paymentplan.dto';
 import { PaymentplansService } from './paymentplan.service';
-import { Role } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/common/defaults';
 
 @Controller('paymentplan')
 export class PaymentplanController {
     constructor(private paymentplanService: PaymentplansService) {}
 
-    @Role(UserRole.ADMIN)
+    @Roles(UserRole.ADMIN)
     @Post()
     async create(@Body() body: CreatePaymentplanDto): Promise<PaymentPlan> {
         return this.paymentplanService.create(body);
@@ -37,6 +37,7 @@ export class PaymentplanController {
         return this.paymentplanService.findById(id);
     }
 
+    @Roles(UserRole.ADMIN)
     @Patch(':id')
     async update(
         @Param('id', ParseUUIDPipe) id: string,
@@ -45,6 +46,7 @@ export class PaymentplanController {
         return this.paymentplanService.update(id, body);
     }
 
+    @Roles(UserRole.ADMIN)
     @Delete(':id')
     async remove(@Param('id', ParseUUIDPipe) id: string): Promise<PaymentPlan> {
         return this.paymentplanService.remove(id);

@@ -8,5 +8,6 @@ import { RequestpostController } from './requestpost.controller';
     imports: [TypeOrmModule.forFeature([RequestPost])],
     controllers: [RequestpostController],
     providers: [RequestpostService],
+    exports: [RequestpostService],
 })
 export class RequestpostModule {}

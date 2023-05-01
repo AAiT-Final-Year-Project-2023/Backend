@@ -1,23 +1,16 @@
 import { DataType } from 'src/common/defaults';
-import { Dataset } from 'src/dataset/dataset.entity';
 import {
     CreateDateColumn,
     Entity,
     UpdateDateColumn,
     PrimaryGeneratedColumn,
     Column,
-    OneToOne,
-    JoinColumn,
 } from 'typeorm';
 
 @Entity()
 export class Data {
     @PrimaryGeneratedColumn('uuid')
     id: string;
-
-    @OneToOne(() => Dataset)
-    @JoinColumn()
-    dataset: string;
 
     @Column({
         type: 'enum',
