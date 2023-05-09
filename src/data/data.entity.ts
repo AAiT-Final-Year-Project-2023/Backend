@@ -19,6 +19,9 @@ export class Data {
     type: string;
 
     @Column()
+    extension: string;
+
+    @Column()
     src: string;
 
     @Column({ type: 'json' })

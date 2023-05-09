@@ -8,5 +8,6 @@ import { DataController } from './data.controller';
     imports: [TypeOrmModule.forFeature([Data])],
     controllers: [DataController],
     providers: [DataService],
+    exports: [DataService],
 })
 export class DataModule {}

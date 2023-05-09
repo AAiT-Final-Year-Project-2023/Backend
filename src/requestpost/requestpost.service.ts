@@ -12,21 +12,47 @@ export class RequestpostService {
         @InjectRepository(RequestPost) private repo: Repository<RequestPost>,
     ) {}
 
-    async create(requestPost: CreateRequestPostDto): Promise<RequestPost> {
-        // attach a user and payment_plan
-        const newRequestPost = await this.repo.create(requestPost);
+    async create(
+        requestPost: CreateRequestPostDto,
+        userId: string,
+    ): Promise<RequestPost> {
+        const newRequestPost = this.repo.create({
+            user: userId,
+            ...requestPost,
+        });
         return this.repo.save(newRequestPost);
     }
 
+    // add sorting
     async find(
         page?: number,
         limit?: number,
     ): Promise<FindPagination<RequestPost>> {
-        const size = this.repo.count();
-        const requestPosts = this.repo.find({
-            skip: (page - 1) * limit,
-            take: limit,
-        });
+        const metadata = this.repo.metadata;
+        let requestPostColumns = metadata.nonVirtualColumns.map(
+            (column) => column.propertyName,
+        );
+        requestPostColumns = requestPostColumns.map(
+            (column) => `request_post.${column}`,
+        );
+        const size = await this.repo.count();
+
+        const requestPosts = await this.repo
+            .createQueryBuilder('request_post')
+            .leftJoinAndSelect('request_post.user', 'user')
+            .leftJoinAndSelect('request_post.payment_plan', 'payment_plan')
+            .select([
+                ...requestPostColumns,
+                'payment_plan.id',
+                'user.id',
+                'payment_plan.title',
+                'user.username',
+                'user.email',
+                'user.image',
+            ])
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getMany();
 
         return {
             results: requestPosts,
@@ -35,7 +61,28 @@ export class RequestpostService {
     }
 
     async findById(id: string): Promise<RequestPost> {
-        return this.repo.findOne({ where: { id } });
+        const metadata = this.repo.metadata;
+        let requestPostColumns = metadata.nonVirtualColumns.map(
+            (column) => column.propertyName,
+        );
+        requestPostColumns = requestPostColumns.map(
+            (column) => `request_post.${column}`,
+        );
+        return this.repo
+            .createQueryBuilder('request_post')
+            .leftJoinAndSelect('request_post.user', 'user')
+            .leftJoinAndSelect('request_post.payment_plan', 'payment_plan')
+            .where('request_post.id = :id', { id })
+            .select([
+                ...requestPostColumns,
+                'payment_plan.id',
+                'user.id',
+                'payment_plan.title',
+                'user.username',
+                'user.email',
+                'user.image',
+            ])
+            .getOne();
     }
 
     async update(

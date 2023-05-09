@@ -17,6 +17,7 @@ import { DataType } from 'src/common/defaults';
 import { IsSupportedFileExtension } from 'src/decorators/IsSupportedFileExtension.decorator';
 import { IsValidExtensionForDatatype } from 'src/decorators/IsValidExtensionForDatatype.decorator';
 import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator';
+import { IsValidRequestPostDataSize } from 'src/decorators/IsValidRequestPostDataSize.decorator';
 
 export class UpdateRequestPostDto {
     @IsOptional()
@@ -59,7 +60,6 @@ export class UpdateRequestPostDto {
     @IsValidExtensionForDatatype()
     extensions: string[];
 
-    // In KBs
     @IsOptional()
     @IsNotEmpty()
     @IsInt()

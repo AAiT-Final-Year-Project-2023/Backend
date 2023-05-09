@@ -17,6 +17,7 @@ import { DataType } from 'src/common/defaults';
 import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator';
 import { IsSupportedFileExtension } from 'src/decorators/IsSupportedFileExtension.decorator';
 import { IsValidExtensionForDatatype } from 'src/decorators/IsValidExtensionForDatatype.decorator';
+import { IsValidRequestPostDataSize } from 'src/decorators/IsValidRequestPostDataSize.decorator';
 
 export class CreateRequestPostDto {
     @IsNotEmpty()
@@ -56,6 +57,7 @@ export class CreateRequestPostDto {
     @IsNotEmpty()
     @IsInt()
     @IsPositive()
+    @IsValidRequestPostDataSize()
     data_size: number;
 
     // In birr

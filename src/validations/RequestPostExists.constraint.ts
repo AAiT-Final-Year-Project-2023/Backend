@@ -4,6 +4,7 @@ import {
     ValidatorConstraintInterface,
     ValidationArguments,
 } from 'class-validator';
+import { isValidUUID } from 'src/common/functions';
 import { RequestpostService } from 'src/requestpost/requestpost.service';
 
 @ValidatorConstraint({ name: 'RequestPostExists', async: true })
@@ -14,10 +15,13 @@ export class RequestPostExistsConstraint
     constructor(private requestPostService: RequestpostService) {}
 
     async validate(requestPostId: string, args: ValidationArguments) {
-        const requestPost = await this.requestPostService.findById(
-            requestPostId,
-        );
-        return requestPost !== null;
+        if (isValidUUID(requestPostId)) {
+            const requestPost = await this.requestPostService.findById(
+                requestPostId,
+            );
+            return requestPost !== null;
+        }
+        return false;
     }
 
     defaultMessage(args: ValidationArguments) {

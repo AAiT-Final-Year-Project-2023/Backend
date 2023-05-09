@@ -20,8 +20,8 @@ export class DatasetService {
         page?: number,
         limit?: number,
     ): Promise<FindPagination<Dataset>> {
-        const size = this.repo.count();
-        const datasets = this.repo.find({
+        const size = await this.repo.count();
+        const datasets = await this.repo.find({
             skip: (page - 1) * limit,
             take: limit,
         });

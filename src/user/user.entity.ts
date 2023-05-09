@@ -43,7 +43,7 @@ export class User {
         type: 'enum',
         enum: UserRole,
         default: [UserRole.USER],
-        array: true
+        array: true,
     })
     roles: UserRole[];
 

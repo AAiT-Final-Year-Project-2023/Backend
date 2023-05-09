@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -30,7 +30,6 @@ import { IsAvailableUsernameConstraint } from './validations/IsAvailableUsername
 import { RolesGuard } from './guards/role.guard';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
-import { MulterModule } from '@nestjs/platform-express';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailService } from './email/email.service';
@@ -38,15 +37,13 @@ import { EmailModule } from './email/email.module';
 import { UserExistsConstraint } from './validations/UserExists.constraint';
 import { IsValidEmailConstraint } from './validations/IsValidEmail.constraint';
 import { RequestPostExistsConstraint } from './validations/RequestPostExists.constraint';
-import { RequestpostService } from './requestpost/requestpost.service';
+import { ContributionUploadMiddleware } from './middlewares/ContributionUploadMiddleware.middleware';
+import { IsValidRequestPostDataSizeConstraint } from './validations/IsValidRequestPostDataSize.constraint';
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-        }),
-        MulterModule.register({
-            dest: './uploads',
         }),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
@@ -121,6 +118,7 @@ import { RequestpostService } from './requestpost/requestpost.service';
         UserExistsConstraint,
         RequestPostExistsConstraint,
         IsValidEmailConstraint,
+        IsValidRequestPostDataSizeConstraint,
         {
             provide: APP_GUARD,
             useClass: JwtAuthGuard,
@@ -131,4 +129,10 @@ import { RequestpostService } from './requestpost/requestpost.service';
         },
     ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer
+            .apply(ContributionUploadMiddleware)
+            .forRoutes('requestpost/:id/contribution/upload');
+    }
+}

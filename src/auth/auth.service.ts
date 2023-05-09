@@ -59,7 +59,7 @@ export class AuthService {
         const newUser = await this.userService.create(newUserDetails);
         await this.userService.update(newUser.id, {
             google_authenticated: true,
-            email_is_valid: true
+            email_is_valid: true,
         });
 
         return await this.signin(newUser);

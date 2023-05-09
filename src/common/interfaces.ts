@@ -1,8 +1,8 @@
 import { UserRole } from './defaults';
 
 export interface FindPagination<T> {
-    results: Promise<T[]>;
-    total: Promise<number>;
+    results: T[];
+    total: number;
 }
 
 export interface GoogleUserInfo {

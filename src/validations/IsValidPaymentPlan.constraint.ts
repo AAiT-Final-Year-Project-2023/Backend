@@ -4,6 +4,7 @@ import {
     ValidatorConstraintInterface,
     ValidationArguments,
 } from 'class-validator';
+import { isValidUUID } from 'src/common/functions';
 import { PaymentplansService } from 'src/paymentplan/paymentplan.service';
 
 @ValidatorConstraint({ name: 'IsValidPaymentPlan', async: true })
@@ -14,8 +15,11 @@ export class IsValidPaymentPlanConstraint
     constructor(private paymentPlanService: PaymentplansService) {}
 
     async validate(payment_plan: string, args: ValidationArguments) {
-        const plan = await this.paymentPlanService.findById(payment_plan);
-        return plan !== null;
+        if (isValidUUID(payment_plan)) {
+            const plan = await this.paymentPlanService.findById(payment_plan);
+            return plan !== null;
+        }
+        return false;
     }
 
     defaultMessage(args: ValidationArguments) {

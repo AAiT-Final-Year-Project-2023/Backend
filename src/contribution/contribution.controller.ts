@@ -1,50 +1,35 @@
 import {
-    Body,
     Controller,
     Delete,
     Get,
+    HttpException,
+    HttpStatus,
     Param,
     ParseIntPipe,
     ParseUUIDPipe,
-    Patch,
-    Post,
     Query,
-    UploadedFile,
-    UseInterceptors,
 } from '@nestjs/common';
-import { CreateContributionDto } from './dtos/create_contribution.dto';
-import { UpdateContributionDto } from './dtos/update_contribution.dto';
 import { ContributionService } from './contribution.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthorizedUserData } from 'src/common/interfaces';
+import { User } from 'src/decorators/CurrentUser.decorator';
+import { ContributionStatus } from 'src/common/defaults';
+import { DataService } from 'src/data/data.service';
+import { existsSync, unlinkSync } from 'fs';
 
 @Controller('contribution')
 export class ContributionController {
-    constructor(private contributionService: ContributionService) {}
-
-    // name the file like: post_request_id/user_id+timestamp
-    @Post()
-    @UseInterceptors(FileInterceptor('file'))
-    async create(
-        @UploadedFile() file: Express.Multer.File,
-        @Body() body: CreateContributionDto,
-    ) {
-        console.log(file);
-        // return this.contributionService.create(body);
-    }
+    constructor(
+        private contributionService: ContributionService,
+        private dataService: DataService,
+    ) {}
 
     @Get()
     async find(
-        @Query('requestPostId', ParseUUIDPipe) requestPostId?: string,
+        @Query('request_post', ParseUUIDPipe) requestPostId?: string,
         @Query('page', ParseIntPipe) page?: number,
         @Query('limit') limit?: number,
     ) {
-        if (requestPostId)
-            return this.contributionService.findRequestPostContributions(
-                requestPostId,
-                page,
-                limit,
-            );
-        return this.contributionService.find(page, limit);
+        return this.contributionService.find(requestPostId, page, limit);
     }
 
     @Get(':id')
@@ -52,16 +37,34 @@ export class ContributionController {
         return this.contributionService.findById(id);
     }
 
-    @Patch(':id')
-    async update(
-        @Param('id', ParseUUIDPipe) id: string,
-        @Body() body: UpdateContributionDto,
-    ) {
-        return this.contributionService.update(id, body);
-    }
-
     @Delete(':id')
-    async remove(@Param('id', ParseUUIDPipe) id: string) {
+    async remove(
+        @Param('id', ParseUUIDPipe) id: string,
+        @User() user: AuthorizedUserData,
+    ) {
+        const contribution = await this.contributionService.findById(id);
+        if (!contribution)
+            throw new HttpException(
+                'Contribution not found',
+                HttpStatus.NOT_FOUND,
+            );
+        if (contribution.user !== user.userId)
+            throw new HttpException(
+                'User unauthorized',
+                HttpStatus.UNAUTHORIZED,
+            );
+        if (contribution.status === ContributionStatus.ACCEPTED)
+            throw new HttpException(
+                `Cannot delete contribution with status: ${ContributionStatus.ACCEPTED}`,
+                HttpStatus.BAD_REQUEST,
+            );
+
+        const data = await this.dataService.findById(contribution.data);
+        if (data) {
+            const fileSrc = data.src;
+            if (existsSync(fileSrc)) unlinkSync(fileSrc);
+        }
+
         return this.contributionService.remove(id);
     }
 }

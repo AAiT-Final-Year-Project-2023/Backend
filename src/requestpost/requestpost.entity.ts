@@ -19,7 +19,7 @@ export class RequestPost {
     id: string;
 
     @ManyToOne(() => User, (user) => user.request_posts)
-    user: User;
+    user: string;
 
     @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
     payment_plan: string;
@@ -42,6 +42,9 @@ export class RequestPost {
     })
     datatype: string;
 
+    @Column('varchar', { array: true })
+    extensions: string[];
+
     @Column()
     data_size: number;
 
@@ -58,11 +61,7 @@ export class RequestPost {
     })
     access: DatasetAccess;
 
-    @OneToMany(
-        () => Contribution,
-        (contribution) => contribution.request_post,
-        { cascade: true },
-    )
+    @OneToMany(() => Contribution, (contribution) => contribution.request_post)
     contributions: Contribution[];
 
     @ManyToMany(() => User, (user) => user.upvoted_request_posts)

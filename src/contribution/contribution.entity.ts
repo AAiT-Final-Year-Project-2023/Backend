@@ -19,7 +19,7 @@ export class Contribution {
     id: string;
 
     @ManyToOne(() => User, (user) => user.contributions)
-    user: User;
+    user: string;
 
     @ManyToOne(() => RequestPost, (requestpost) => requestpost.contributions)
     request_post: string;

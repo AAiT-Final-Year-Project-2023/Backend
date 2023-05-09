@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post, Req } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Public } from './decorators/IsPublicRoute.decorator';
 import { EmailService } from './email/email.service';
@@ -14,8 +14,15 @@ export class AppController {
         private readonly emailService: EmailService,
     ) {}
 
-    @Get('test')
-    getHello(@User() user: AuthorizedUserData) {
+    @Get('curr-user')
+    currUser(@User() user) {
+        return user;
+    }
+
+    @Post('test')
+    @Public()
+    getHello(@User() user: AuthorizedUserData, @Req() req: any) {
+        console.log(req.body);
         return user;
     }
 

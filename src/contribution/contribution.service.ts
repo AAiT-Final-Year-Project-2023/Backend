@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindPagination } from 'src/common/interfaces';
 import { Repository } from 'typeorm';
 import { Contribution } from './contribution.entity';
-import { CreateContributionDto } from './dtos/create_contribution.dto';
 
 @Injectable()
 export class ContributionService {
@@ -11,43 +10,51 @@ export class ContributionService {
         @InjectRepository(Contribution) private repo: Repository<Contribution>,
     ) {}
 
-    async create(contribution: CreateContributionDto): Promise<Contribution> {
-        const newContribution = await this.repo.create(contribution);
+    async create(contribution: Partial<Contribution>): Promise<Contribution> {
+        const newContribution = this.repo.create(contribution);
         return this.repo.save(newContribution);
     }
 
     async find(
+        requestPostId?: string,
         page?: number,
         limit?: number,
     ): Promise<FindPagination<Contribution>> {
-        const size = this.repo.count();
-        const requestPosts = this.repo.find({
-            skip: (page - 1) * limit,
-            take: limit,
-        });
+        const metadata = this.repo.metadata;
+        let contributionColumns = metadata.nonVirtualColumns.map(
+            (column) => column.propertyName,
+        );
+        contributionColumns = contributionColumns.map(
+            (column) => `request_post.${column}`,
+        );
+        const size = await this.repo.count();
+
+        const contributions = await this.repo
+            .createQueryBuilder('contribution')
+            .leftJoinAndSelect('contribution.user', 'user')
+            .leftJoinAndSelect('contribution.data', 'data')
+            .select([
+                ...contributionColumns,
+                'user.id',
+                'user.username',
+                'user.email',
+                'user.image',
+                'data.type',
+                'data.size',
+                'data.extension',
+            ])
+            .where(
+                requestPostId
+                    ? 'contribution.request_post = :request_post'
+                    : '1=1',
+                { request_post: requestPostId },
+            )
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getMany();
 
         return {
-            results: requestPosts,
-            total: size,
-        };
-    }
-
-    async findRequestPostContributions(
-        requestPostId: string,
-        limit?: number,
-        page?: number,
-    ): Promise<FindPagination<Contribution>> {
-        const size = this.repo.count();
-        const requestPosts = this.repo.find({
-            where: {
-                request_post: requestPostId,
-            },
-            skip: (page - 1) * limit,
-            take: limit,
-        });
-
-        return {
-            results: requestPosts,
+            results: contributions,
             total: size,
         };
     }
