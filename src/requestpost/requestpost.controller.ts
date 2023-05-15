@@ -28,16 +28,18 @@ import { User } from 'src/decorators/CurrentUser.decorator';
 import { AuthorizedUserData } from 'src/common/interfaces';
 import { PaymentplansService } from 'src/paymentplan/paymentplan.service';
 import { DataService } from 'src/data/data.service';
-import { ContributionStatus } from 'src/common/defaults';
+import { ContributionStatus, NotificationType } from 'src/common/defaults';
 import { Contribution } from 'src/contribution/contribution.entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Controller('requestpost')
 export class RequestpostController {
     constructor(
-        private requestPostService: RequestpostService,
-        private contributionService: ContributionService,
-        private paymentPlanService: PaymentplansService,
         private dataService: DataService,
+        private requestPostService: RequestpostService,
+        private paymentPlanService: PaymentplansService,
+        private notificationService: NotificationService,
+        private contributionService: ContributionService,
     ) {}
 
     @Post()
@@ -225,6 +227,13 @@ export class RequestpostController {
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
+
+        await this.notificationService.create({
+            title: NotificationType.CONTRIBUTION_MADE,
+            from_user: user.userId,
+            user: requestPost.id,
+        });
+
         return contribution;
     }
 
@@ -266,6 +275,12 @@ export class RequestpostController {
                 HttpStatus.NOT_FOUND,
             );
 
+        await this.notificationService.create({
+            title: NotificationType.CONTRIBUTION_ACCEPTED,
+            from_user: user.userId,
+            user: contribution.user,
+        });
+
         return this.contributionService.update(contribution.id, {
             status: ContributionStatus.ACCEPTED,
         });
@@ -299,6 +314,12 @@ export class RequestpostController {
                 'Contribution not found',
                 HttpStatus.NOT_FOUND,
             );
+
+        await this.notificationService.create({
+            title: NotificationType.CONTRIBUTION_REJECTED,
+            from_user: user.userId,
+            user: contribution.user,
+        });
 
         return this.contributionService.update(contribution.id, {
             status: ContributionStatus.REJECTED,

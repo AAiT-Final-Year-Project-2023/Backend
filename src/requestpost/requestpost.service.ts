@@ -36,8 +36,7 @@ export class RequestpostService {
             (column) => `request_post.${column}`,
         );
         const size = await this.repo.count();
-
-        const requestPosts = await this.repo
+        const query = this.repo
             .createQueryBuilder('request_post')
             .leftJoinAndSelect('request_post.user', 'user')
             .leftJoinAndSelect('request_post.payment_plan', 'payment_plan')
@@ -49,10 +48,14 @@ export class RequestpostService {
                 'user.username',
                 'user.email',
                 'user.image',
-            ])
-            .skip((page - 1) * limit)
-            .take(limit)
-            .getMany();
+            ]);
+
+        if (limit) {
+            query.take(limit);
+            if (page) query.skip((page - 1) * limit);
+        }
+
+        const requestPosts = await query.getMany();
 
         return {
             results: requestPosts,

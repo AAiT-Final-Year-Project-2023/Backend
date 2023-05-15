@@ -15,10 +15,14 @@ export class DataService {
 
     async find(page?: number, limit?: number): Promise<FindPagination<Data>> {
         const size = await this.repo.count();
-        const data = await this.repo.find({
-            skip: (page - 1) * limit,
-            take: limit,
-        });
+        const query = this.repo.createQueryBuilder('data');
+
+        if (limit) {
+            query.take(limit);
+            if (page) query.skip((page - 1) * limit);
+        }
+
+        const data = await query.getMany();
 
         return {
             results: data,

@@ -16,18 +16,14 @@ export class Notification {
     id: string;
 
     @ManyToOne(() => User, (user) => user.notifications)
-    user: User;
+    user: string;
 
-    // ???
     @OneToOne(() => User)
     @JoinColumn()
     from_user: string;
 
     @Column()
     title: string;
-
-    @Column()
-    description: string;
 
     @Column({ default: false })
     seen: boolean;

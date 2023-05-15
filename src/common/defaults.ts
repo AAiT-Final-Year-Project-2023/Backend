@@ -32,3 +32,11 @@ export enum CodeExpiration {
     email_verification = 5,
     change_password = 5,
 }
+
+export enum NotificationType {
+    UPVOTE = 'upvote',
+    CONTRIBUTION_MADE = 'contribution made',
+    CONTRIBUTION_ACCEPTED = 'contribution accepted',
+    CONTRIBUTION_REJECTED = 'contribution rejected',
+    PAYMENT_ACCEPTED = 'payment accepted',
+}

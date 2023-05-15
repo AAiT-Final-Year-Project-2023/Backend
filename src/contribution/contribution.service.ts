@@ -29,7 +29,7 @@ export class ContributionService {
         );
         const size = await this.repo.count();
 
-        const contributions = await this.repo
+        const query = this.repo
             .createQueryBuilder('contribution')
             .leftJoinAndSelect('contribution.user', 'user')
             .leftJoinAndSelect('contribution.data', 'data')
@@ -42,16 +42,19 @@ export class ContributionService {
                 'data.type',
                 'data.size',
                 'data.extension',
-            ])
-            .where(
-                requestPostId
-                    ? 'contribution.request_post = :request_post'
-                    : '1=1',
-                { request_post: requestPostId },
-            )
-            .skip((page - 1) * limit)
-            .take(limit)
-            .getMany();
+            ]);
+
+        if (requestPostId)
+            query.where('contribution.request_post = :request_post', {
+                request_post: requestPostId,
+            });
+
+        if (limit) {
+            query.take(limit);
+            if (page) query.skip((page - 1) * limit);
+        }
+
+        const contributions = await query.getMany();
 
         return {
             results: contributions,
