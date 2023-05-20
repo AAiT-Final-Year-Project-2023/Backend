@@ -18,9 +18,8 @@ export class Dataset {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @OneToOne(() => User)
-    @JoinColumn()
-    user: User;
+    @ManyToOne(() => User, (user) => user.datasets)
+    user: string;
 
     @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
     payment_plan: PaymentPlan;

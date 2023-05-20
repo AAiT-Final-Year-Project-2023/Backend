@@ -97,6 +97,9 @@ export class User {
     @OneToMany(() => Contribution, (contribution) => contribution.user)
     contributions: Contribution[];
 
+    @OneToMany(() => Dataset, (dataset) => dataset.user)
+    datasets: Dataset[];
+
     @OneToMany(() => RequestPost, (requestpost) => requestpost.user)
     request_posts: RequestPost[];
 
