@@ -39,6 +39,9 @@ import { IsValidEmailConstraint } from './validations/IsValidEmail.constraint';
 import { RequestPostExistsConstraint } from './validations/RequestPostExists.constraint';
 import { ContributionUploadMiddleware } from './middlewares/ContributionUploadMiddleware.middleware';
 import { IsValidRequestPostDataSizeConstraint } from './validations/IsValidRequestPostDataSize.constraint';
+import { ChapaModule } from 'chapa-nestjs';
+import { PaymentModule } from './payment/payment.module';
+import { Payment } from './payment/payment.entity';
 
 @Module({
     imports: [
@@ -64,10 +67,18 @@ import { IsValidRequestPostDataSizeConstraint } from './validations/IsValidReque
                     Contribution,
                     RequestPost,
                     FileExtension,
+                    Payment,
                 ],
                 synchronize: true,
             }),
             inject: [ConfigService],
+        }),
+        ChapaModule.registerAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (configService: ConfigService) => ({
+                secretKey: configService.get('CHAPA_SECRET_KEY'),
+            }),
         }),
         MailerModule.forRootAsync({
             imports: [ConfigModule],
@@ -105,6 +116,7 @@ import { IsValidRequestPostDataSizeConstraint } from './validations/IsValidReque
         RequestpostModule,
         FileExtensionModule,
         EmailModule,
+        PaymentModule,
     ],
     controllers: [AppController],
     providers: [

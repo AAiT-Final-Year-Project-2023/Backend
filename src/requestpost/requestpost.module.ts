@@ -14,6 +14,7 @@ import { PaymentplanModule } from 'src/paymentplan/paymentplan.module';
 import { User } from 'src/user/user.entity';
 import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
 import { DataModule } from 'src/data/data.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
     imports: [
@@ -45,6 +46,7 @@ import { DataModule } from 'src/data/data.module';
             },
             inject: [ConfigService],
         }),
+        NotificationModule,
         ContributionModule,
         PaymentplanModule,
         DataModule,
