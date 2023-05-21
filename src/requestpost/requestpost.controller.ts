@@ -299,6 +299,11 @@ export class RequestpostController {
         // validate the body, if valid delete the file
         const { size, mimetype } = file;
 
+        if(requestPost.data_size > size){
+            if (existsSync(file.path)) unlinkSync(file.path);
+            throw new HttpException(`Contribution file too big, maximum allowed for this request post: ${requestPost.data_size} bytes`, HttpStatus.BAD_REQUEST);
+        }
+
         const [datatype, extension] = mimetype.split('/');
 
         if (
