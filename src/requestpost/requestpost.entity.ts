@@ -7,6 +7,7 @@ import {
     OneToMany,
     ManyToOne,
     ManyToMany,
+    JoinTable,
 } from 'typeorm';
 import { DatasetAccess, DataType } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
@@ -57,7 +58,7 @@ export class RequestPost {
     @Column({
         type: 'enum',
         enum: DatasetAccess,
-        default: DatasetAccess.PRIVATE,
+        default: DatasetAccess.PUBLIC,
     })
     access: DatasetAccess;
 
@@ -68,9 +69,15 @@ export class RequestPost {
     contributions: Contribution[];
 
     @ManyToMany(() => User, (user) => user.upvoted_request_posts)
+    @JoinTable({
+        name: 'user_requestpost_upvotes',
+    })
     upvoted_by: User[];
 
     @ManyToMany(() => User, (user) => user.downvoted_request_posts)
+        @JoinTable({
+        name: 'user_requestpost_downvotes',
+    })
     downvoted_by: User[];
 
     @CreateDateColumn()

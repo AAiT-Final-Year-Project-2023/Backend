@@ -15,6 +15,7 @@ import { User } from 'src/user/user.entity';
 import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
 import { DataModule } from 'src/data/data.module';
 import { NotificationModule } from 'src/notification/notification.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
     imports: [
@@ -50,6 +51,7 @@ import { NotificationModule } from 'src/notification/notification.module';
         ContributionModule,
         PaymentplanModule,
         DataModule,
+        UserModule
     ],
     controllers: [RequestpostController],
     providers: [RequestpostService, ContributionUploadMiddleware],

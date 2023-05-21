@@ -104,27 +104,15 @@ export class User {
     request_posts: RequestPost[];
 
     @ManyToMany(() => Dataset, (dataset) => dataset.upvoted_by)
-    @JoinTable({
-        name: 'user_dataset_upvotes',
-    })
     upvoted_datasets: Dataset[];
 
     @ManyToMany(() => Dataset, (dataset) => dataset.downvoted_by)
-    @JoinTable({
-        name: 'user_dataset_downvotes',
-    })
     downvoted_datasets: Dataset[];
 
     @ManyToMany(() => RequestPost, (requestpost) => requestpost.upvoted_by)
-    @JoinTable({
-        name: 'user_requestpost_upvotes',
-    })
     upvoted_request_posts: RequestPost[];
 
     @ManyToMany(() => RequestPost, (requestpost) => requestpost.downvoted_by)
-    @JoinTable({
-        name: 'user_requestpost_downvotes',
-    })
     downvoted_request_posts: RequestPost[];
 
     @CreateDateColumn()

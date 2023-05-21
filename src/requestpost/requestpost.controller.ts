@@ -14,8 +14,6 @@ import {
     HttpException,
     HttpStatus,
     Put,
-    ParseEnumPipe,
-    ParseBoolPipe,
 } from '@nestjs/common';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
@@ -32,7 +30,6 @@ import { PaymentplansService } from 'src/paymentplan/paymentplan.service';
 import { DataService } from 'src/data/data.service';
 import {
     ContributionStatus,
-    DataType,
     DataTypeFilter,
     NotificationType,
     SortOrder,
@@ -41,8 +38,9 @@ import { Contribution } from 'src/contribution/contribution.entity';
 import { NotificationService } from 'src/notification/notification.service';
 import { StringLengthValidationPipe } from 'src/pipes/StringLengthValidation.pipe';
 import { EnumValidationPipe } from 'src/pipes/EnumValidation.pipe';
-import { Public } from 'src/decorators/IsPublicRoute.decorator';
 import { enumToString } from 'src/common/functions';
+import { UserService } from 'src/user/user.service';
+import { User as userEntity } from 'src/user/user.entity';
 
 @Controller('requestpost')
 export class RequestpostController {
@@ -52,6 +50,7 @@ export class RequestpostController {
         private paymentPlanService: PaymentplansService,
         private notificationService: NotificationService,
         private contributionService: ContributionService,
+        private userService: UserService,
     ) {}
 
     @Post()
@@ -63,7 +62,6 @@ export class RequestpostController {
     }
 
     @Get()
-    @Public()
     async find(
         @Query('page', ParseIntPipe) page: number,
         @Query('limit', ParseIntPipe) limit: number,
@@ -158,7 +156,7 @@ export class RequestpostController {
         @User() user: AuthorizedUserData,
     ) {
         const requestPost = await this.requestPostService.findById(id);
-        if (requestPost && requestPost.user !== user.userId) {
+        if (requestPost && requestPost.user['id'] !== user.userId) {
             throw new HttpException(
                 'User unauthorized',
                 HttpStatus.UNAUTHORIZED,
@@ -180,7 +178,8 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user !== user.userId)
+            
+        if (requestPost.user['id'] !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -203,7 +202,7 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user !== user.userId)
+        if (requestPost.user['id'] !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -225,13 +224,35 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user !== user.userId)
+        if (requestPost.user['id'] !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
             );
 
         return this.requestPostService.makePublic(requestPostId);
+    }
+
+    @Get(':id/upvote')
+    async upvote(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @User() user: AuthorizedUserData,
+    ) {
+        const userEntity: userEntity = await this.userService.findById(
+            user.userId,
+        );
+        return this.requestPostService.upvote(requestPostId, userEntity);
+    }
+
+    @Get(':id/downvote')
+    async downvote(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @User() user: AuthorizedUserData,
+    ) {
+        const userEntity: userEntity = await this.userService.findById(
+            user.userId,
+        );
+        return this.requestPostService.downvote(requestPostId, userEntity);
     }
 
     // Contribution
@@ -377,7 +398,7 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user !== user.userId)
+        if (requestPost.user['id'] !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -417,7 +438,7 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user !== user.userId)
+        if (requestPost.user['id'] !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -458,7 +479,7 @@ export class RequestpostController {
                 HttpStatus.NOT_FOUND,
             );
 
-        if (requestPost && requestPost.user !== user.userId) {
+        if (requestPost && requestPost.user['id'] !== user.userId) {
             throw new HttpException(
                 'User unauthorized',
                 HttpStatus.UNAUTHORIZED,

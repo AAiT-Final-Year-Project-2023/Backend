@@ -8,6 +8,7 @@ import {
     JoinColumn,
     ManyToMany,
     ManyToOne,
+    JoinTable,
 } from 'typeorm';
 import { DataType } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
@@ -46,9 +47,15 @@ export class Dataset {
     price: number;
 
     @ManyToMany(() => User, (user) => user.upvoted_datasets)
+    @JoinTable({
+        name: 'user_dataset_upvotes',
+    })
     upvoted_by: User[];
 
     @ManyToMany(() => User, (user) => user.downvoted_datasets)
+    @JoinTable({
+        name: 'user_dataset_downvotes',
+    })
     downvoted_by: User[];
 
     @CreateDateColumn()
