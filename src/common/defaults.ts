@@ -40,3 +40,16 @@ export enum NotificationType {
     CONTRIBUTION_REJECTED = 'contribution rejected',
     PAYMENT_ACCEPTED = 'payment accepted',
 }
+
+export enum DataTypeFilter {
+    IMAGE = 'image',
+    AUDIO = 'audio',
+    VIDEO = 'video',
+    TEXT = 'text',
+    ALL = 'all',
+}
+
+export enum SortOrder {
+    ASC = 'ASC',
+    DESC = 'DESC',
+}

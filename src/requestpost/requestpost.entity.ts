@@ -30,7 +30,7 @@ export class RequestPost {
     @Column()
     description: string;
 
-    @Column('varchar', { array: true })
+    @Column('varchar', { array: true, default: [] })
     labels: string[];
 
     @Column()

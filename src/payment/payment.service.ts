@@ -49,9 +49,9 @@ export class PaymentService {
         });
     }
 
-    async getBanks(){
-      const response = await this.chapaService.getBanks()
-      return response;
+    async getBanks() {
+        const response = await this.chapaService.getBanks();
+        return response;
     }
 
     findAll() {

@@ -14,6 +14,8 @@ import {
     HttpException,
     HttpStatus,
     Put,
+    ParseEnumPipe,
+    ParseBoolPipe,
 } from '@nestjs/common';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
@@ -28,9 +30,19 @@ import { User } from 'src/decorators/CurrentUser.decorator';
 import { AuthorizedUserData } from 'src/common/interfaces';
 import { PaymentplansService } from 'src/paymentplan/paymentplan.service';
 import { DataService } from 'src/data/data.service';
-import { ContributionStatus, NotificationType } from 'src/common/defaults';
+import {
+    ContributionStatus,
+    DataType,
+    DataTypeFilter,
+    NotificationType,
+    SortOrder,
+} from 'src/common/defaults';
 import { Contribution } from 'src/contribution/contribution.entity';
 import { NotificationService } from 'src/notification/notification.service';
+import { StringLengthValidationPipe } from 'src/pipes/StringLengthValidation.pipe';
+import { EnumValidationPipe } from 'src/pipes/EnumValidation.pipe';
+import { Public } from 'src/decorators/IsPublicRoute.decorator';
+import { enumToString } from 'src/common/functions';
 
 @Controller('requestpost')
 export class RequestpostController {
@@ -51,11 +63,49 @@ export class RequestpostController {
     }
 
     @Get()
+    @Public()
     async find(
-        @Query('page', ParseIntPipe) page?: number,
-        @Query('limit') limit?: number,
+        @Query('page', ParseIntPipe) page: number,
+        @Query('limit', ParseIntPipe) limit: number,
+        @Query(
+            'search',
+            new StringLengthValidationPipe(35, 'Search input too long'),
+        )
+        search?: string,
+        @Query(
+            'filter',
+            new EnumValidationPipe(
+                DataTypeFilter,
+                `Filter input has to be one of: [${enumToString(
+                    DataTypeFilter,
+                )}]`,
+            ),
+        )
+        filter?: DataTypeFilter,
+        @Query(
+            'sort',
+            new EnumValidationPipe(
+                SortOrder,
+                `Sort input has to be one of: [${enumToString(SortOrder)}]`,
+            ),
+        )
+        sort?: SortOrder,
+        @Query('mobile') mobile?: string,
     ) {
-        return this.requestPostService.find(page, limit);
+        if (mobile && !['true', 'false'].includes(mobile))
+            throw new HttpException(
+                'Mobile query string must be one of: [true, false]',
+                HttpStatus.BAD_REQUEST,
+            );
+        const platform = mobile && mobile == "true" ? true : false;
+        return this.requestPostService.find(
+            page,
+            limit,
+            search,
+            filter,
+            sort,
+            platform,
+        );
     }
 
     @Get(':id')

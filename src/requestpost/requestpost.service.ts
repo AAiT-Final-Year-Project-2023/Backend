@@ -5,6 +5,7 @@ import { RequestPost } from './requestpost.entity';
 import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { FindPagination } from 'src/common/interfaces';
+import { DataTypeFilter, SortOrder } from 'src/common/defaults';
 
 @Injectable()
 export class RequestpostService {
@@ -23,10 +24,13 @@ export class RequestpostService {
         return this.repo.save(newRequestPost);
     }
 
-    // add sorting
     async find(
         page?: number,
         limit?: number,
+        search?: string,
+        filter?: DataTypeFilter,
+        sort?: SortOrder,
+        mobile?: boolean,
     ): Promise<FindPagination<RequestPost>> {
         const metadata = this.repo.metadata;
         let requestPostColumns = metadata.nonVirtualColumns.map(
@@ -35,7 +39,6 @@ export class RequestpostService {
         requestPostColumns = requestPostColumns.map(
             (column) => `request_post.${column}`,
         );
-        const size = await this.repo.count();
         const query = this.repo
             .createQueryBuilder('request_post')
             .leftJoinAndSelect('request_post.user', 'user')
@@ -50,7 +53,28 @@ export class RequestpostService {
                 'user.image',
             ]);
 
-        if (limit) {
+        if (search && search !== '')
+            query
+                .where('request_post.title LIKE :searchString', {
+                    searchString: `%${search}%`,
+                })
+                .orWhere('request_post.description LIKE :searchString', {
+                    searchString: `%${search}%`,
+                });
+
+        if (filter && filter !== DataTypeFilter.ALL)
+            query.where('request_post.datatype = :dataType', {
+                dataType: filter,
+            });
+
+        if (sort) query.addOrderBy('created_at', sort);
+
+        if (mobile)
+            query.where(
+                'COALESCE(array_length(request_post.labels, 1), 0) = 0',
+            );
+
+        if (limit){
             query.take(limit);
             if (page) query.skip((page - 1) * limit);
         }
@@ -59,7 +83,7 @@ export class RequestpostService {
 
         return {
             results: requestPosts,
-            total: size,
+            total: requestPosts.length,
         };
     }
 

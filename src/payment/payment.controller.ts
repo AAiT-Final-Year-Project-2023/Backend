@@ -16,7 +16,7 @@ export class PaymentController {
 
     @Public()
     @Get('/banks')
-    async getBanks(){
-      return await this.paymentService.getBanks();
+    async getBanks() {
+        return await this.paymentService.getBanks();
     }
 }
