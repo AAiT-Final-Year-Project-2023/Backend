@@ -75,7 +75,7 @@ export class RequestPost {
     upvoted_by: User[];
 
     @ManyToMany(() => User, (user) => user.downvoted_request_posts)
-        @JoinTable({
+    @JoinTable({
         name: 'user_requestpost_downvotes',
     })
     downvoted_by: User[];

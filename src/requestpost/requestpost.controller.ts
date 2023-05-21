@@ -31,7 +31,9 @@ import { DataService } from 'src/data/data.service';
 import {
     ContributionStatus,
     DataTypeFilter,
+    DatasetAccess,
     NotificationType,
+    Owner,
     SortOrder,
 } from 'src/common/defaults';
 import { Contribution } from 'src/contribution/contribution.entity';
@@ -63,6 +65,7 @@ export class RequestpostController {
 
     @Get()
     async find(
+        @User() user: AuthorizedUserData,
         @Query('page', ParseIntPipe) page: number,
         @Query('limit', ParseIntPipe) limit: number,
         @Query(
@@ -81,34 +84,90 @@ export class RequestpostController {
         )
         filter?: DataTypeFilter,
         @Query(
-            'sort',
+            'sortByDate',
             new EnumValidationPipe(
                 SortOrder,
-                `Sort input has to be one of: [${enumToString(SortOrder)}]`,
+                `sortByDate input has to be one of: [${enumToString(
+                    SortOrder,
+                )}]`,
             ),
         )
-        sort?: SortOrder,
+        sortByDate?: SortOrder,
+        @Query(
+            'sortByUpvotes',
+            new EnumValidationPipe(
+                SortOrder,
+                `sortByUpvotes input has to be one of: [${enumToString(
+                    SortOrder,
+                )}]`,
+            ),
+        )
+        sortByUpvotes?: SortOrder,
+        @Query(
+            'sortByDownvotes',
+            new EnumValidationPipe(
+                SortOrder,
+                `sortByDownvotes input has to be one of: [${enumToString(
+                    SortOrder,
+                )}]`,
+            ),
+        )
+        sortByDownvotes?: SortOrder,
+        @Query(
+            'owner',
+            new EnumValidationPipe(
+                Owner,
+                `Owner input has to be one of: [${enumToString(Owner)}]`,
+            ),
+        )
+        owner?: Owner,
         @Query('mobile') mobile?: string,
+        @Query('closed') closed?: string,
     ) {
         if (mobile && !['true', 'false'].includes(mobile))
             throw new HttpException(
                 'Mobile query string must be one of: [true, false]',
                 HttpStatus.BAD_REQUEST,
             );
-        const platform = mobile && mobile == 'true' ? true : false;
+        const isMobile = mobile && mobile == 'true' ? true : false;
+
+        if (closed && !['true', 'false'].includes(closed))
+            throw new HttpException(
+                'Closed query string must be one of: [true, false]',
+                HttpStatus.BAD_REQUEST,
+            );
+        const isClosed = closed && closed == 'true' ? true : false;
+
         return this.requestPostService.find(
             page,
             limit,
             search,
             filter,
-            sort,
-            platform,
+            sortByDate,
+            sortByUpvotes,
+            sortByDownvotes,
+            owner === Owner.SELF ? user.userId : undefined,
+            isMobile,
+            isClosed,
         );
     }
 
     @Get(':id')
-    async findById(@Param('id', ParseUUIDPipe) id: string) {
-        return this.requestPostService.findById(id);
+    async findById(
+        @Param('id', ParseUUIDPipe) id: string,
+        @User() user: AuthorizedUserData,
+    ) {
+        const requestPost = await this.requestPostService.findById(id);
+        if (
+            requestPost.access === DatasetAccess.PRIVATE &&
+            requestPost.user['id'] !== user.userId
+        )
+            throw new HttpException(
+                'User unauthorized',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        return requestPost;
     }
 
     @Patch(':id')
@@ -178,7 +237,7 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-            
+
         if (requestPost.user['id'] !== user.userId)
             throw new HttpException(
                 'User not authorized',
@@ -283,6 +342,24 @@ export class RequestpostController {
             );
         }
 
+        // cannot contribute to a closed request post
+        if (requestPost.closed) {
+            if (existsSync(file.path)) unlinkSync(file.path);
+            throw new HttpException(
+                'Cannot contribute to this Request Post',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        // cannot contribute to a private request post
+        if (requestPost.access === DatasetAccess.PRIVATE) {
+            if (existsSync(file.path)) unlinkSync(file.path);
+            throw new HttpException(
+                'Cannot contribute to this Request Post',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
         // Warn the user if the size of the contributed files is getting too full ??????????????????????????????????
 
         // validate the data type and uploaded file's size
@@ -299,9 +376,12 @@ export class RequestpostController {
         // validate the body, if valid delete the file
         const { size, mimetype } = file;
 
-        if(requestPost.data_size > size){
+        if (requestPost.data_size > size) {
             if (existsSync(file.path)) unlinkSync(file.path);
-            throw new HttpException(`Contribution file too big, maximum allowed for this request post: ${requestPost.data_size} bytes`, HttpStatus.BAD_REQUEST);
+            throw new HttpException(
+                `Contribution file too big, maximum allowed for this request post: ${requestPost.data_size} bytes`,
+                HttpStatus.BAD_REQUEST,
+            );
         }
 
         const [datatype, extension] = mimetype.split('/');

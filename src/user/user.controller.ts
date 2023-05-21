@@ -1,4 +1,5 @@
 import {
+    Body,
     Controller,
     HttpException,
     HttpStatus,
@@ -19,10 +20,14 @@ import { User } from 'src/decorators/CurrentUser.decorator';
 import { User as UserEntity } from './user.entity';
 import { existsSync, unlinkSync } from 'fs';
 import { ConfigService } from '@nestjs/config';
+import { UpdateUserDto } from './dtos/update_user.dto';
 
 @Controller('user')
 export class UserController {
-    constructor(private userService: UserService, private configService: ConfigService) {}
+    constructor(
+        private userService: UserService,
+        private configService: ConfigService,
+    ) {}
 
     @Roles(UserRole.ADMIN)
     @Put('make-admin/:id')
@@ -42,6 +47,14 @@ export class UserController {
             roles: roles,
         });
         return 'User given Admin privilege';
+    }
+
+    @Put('edit_profile')
+    async editProfile(
+        @Body() body: UpdateUserDto,
+        @User() user: AuthorizedUserData,
+    ) {
+        return await this.userService.update(user.userId, body);
     }
 
     @Post('upload_profile_image')
@@ -110,7 +123,11 @@ export class UserController {
             );
         }
         return {
-            url: `http://${this.configService.get<string>('HOST')}:${this.configService.get<string>('PORT')}/uploads/profile_images/${file.path}`,
+            url: `http://${this.configService.get<string>(
+                'HOST',
+            )}:${this.configService.get<string>(
+                'PORT',
+            )}/uploads/profile_images/${file.path}`,
         };
     }
 }

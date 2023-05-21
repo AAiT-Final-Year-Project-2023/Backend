@@ -53,3 +53,8 @@ export enum SortOrder {
     ASC = 'ASC',
     DESC = 'DESC',
 }
+
+export enum Owner {
+    SELF = 'self',
+    ALL = 'all',
+}

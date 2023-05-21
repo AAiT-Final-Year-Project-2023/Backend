@@ -51,7 +51,7 @@ import { UserModule } from 'src/user/user.module';
         ContributionModule,
         PaymentplanModule,
         DataModule,
-        UserModule
+        UserModule,
     ],
     controllers: [RequestpostController],
     providers: [RequestpostService, ContributionUploadMiddleware],

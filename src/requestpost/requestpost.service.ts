@@ -5,7 +5,12 @@ import { RequestPost } from './requestpost.entity';
 import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { FindPagination } from 'src/common/interfaces';
-import { DataTypeFilter, DatasetAccess, SortOrder } from 'src/common/defaults';
+import {
+    DataTypeFilter,
+    DatasetAccess,
+    Owner,
+    SortOrder,
+} from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
 
 @Injectable()
@@ -30,8 +35,12 @@ export class RequestpostService {
         limit?: number,
         search?: string,
         filter?: DataTypeFilter,
-        sort?: SortOrder,
+        sortByDate?: SortOrder,
+        sortByUpvotes?: SortOrder,
+        sortByDownvotes?: SortOrder,
+        userId?: string,
         mobile?: boolean,
+        closed?: boolean,
     ): Promise<FindPagination<RequestPost>> {
         const metadata = this.repo.metadata;
         let requestPostColumns = metadata.nonVirtualColumns.map(
@@ -40,39 +49,91 @@ export class RequestpostService {
         requestPostColumns = requestPostColumns.map(
             (column) => `request_post.${column}`,
         );
+        const upvotesSubquery = this.repo
+            .createQueryBuilder('request_post')
+            .leftJoin('request_post.upvoted_by', 'upvoted_user')
+            .select('request_post.id, COUNT(upvoted_user.id) as upvotes')
+            .groupBy('request_post.id');
+
+        const downvotesSubquery = this.repo
+            .createQueryBuilder('request_post')
+            .leftJoin('request_post.downvoted_by', 'downvoted_user')
+            .select('request_post.id, COUNT(downvoted_user.id) as downvotes')
+            .groupBy('request_post.id');
+
         const query = this.repo
             .createQueryBuilder('request_post')
             .leftJoinAndSelect('request_post.user', 'user')
-            .leftJoinAndSelect('request_post.payment_plan', 'payment_plan') 
+            .leftJoinAndSelect('request_post.payment_plan', 'payment_plan')
             .leftJoinAndSelect('request_post.upvoted_by', 'upvoted_user')
             .leftJoinAndSelect('request_post.downvoted_by', 'downvoted_user')
             .select([
                 ...requestPostColumns,
-                'payment_plan.id',
                 'user.id',
-                'payment_plan.title',
                 'user.username',
                 'user.email',
                 'user.image',
+                'payment_plan.id',
+                'payment_plan.title',
                 'upvoted_user.id',
                 'downvoted_user.id',
-            ]);
+            ])
+            .addSelect('upvotes.upvotes', 'upvotes')
+            .addSelect('downvotes.downvotes', 'downvotes')
+            .leftJoin(
+                `(${upvotesSubquery.getQuery()})`,
+                'upvotes',
+                'upvotes.id = request_post.id',
+            )
+            .leftJoin(
+                `(${downvotesSubquery.getQuery()})`,
+                'downvotes',
+                'downvotes.id = request_post.id',
+            )
+            .addGroupBy(
+                [
+                    ...requestPostColumns,
+                    'user.id',
+                    'user.username',
+                    'user.email',
+                    'user.image',
+                    'payment_plan.id',
+                    'payment_plan.title',
+                    'upvoted_user.id',
+                    'downvoted_user.id',
+                    'upvotes.upvotes',
+                    'downvotes.downvotes',
+                ].join(', '),
+            );
 
         if (search && search !== '')
             query
-                .where('request_post.title LIKE :searchString', {
-                    searchString: `%${search}%`,
+                .where('LOWER(request_post.title) LIKE LOWER(:searchString)', {
+                    searchString: `%${search.trim()}%`,
                 })
-                .orWhere('request_post.description LIKE :searchString', {
-                    searchString: `%${search}%`,
-                });
+                .orWhere(
+                    'LOWER(request_post.description) LIKE LOWER(:searchString)',
+                    {
+                        searchString: `%${search.trim()}%`,
+                    },
+                );
 
         if (filter && filter !== DataTypeFilter.ALL)
             query.where('request_post.datatype = :dataType', {
                 dataType: filter,
             });
 
-        if (sort) query.addOrderBy('created_at', sort);
+        if (userId) query.where('user.id = :userId', { userId });
+        else
+            query.where('request_post.access = :access', {
+                access: DatasetAccess.PUBLIC,
+            });
+
+        if (closed) query.where('request_post.closed = :closed', { closed });
+
+        if (sortByDate) query.addOrderBy('request_post.created_at', sortByDate);
+        if (sortByUpvotes) query.addOrderBy('upvotes', sortByUpvotes);
+        if (sortByDownvotes) query.addOrderBy('downvotes', sortByDownvotes);
 
         if (mobile)
             query.where(
@@ -84,11 +145,11 @@ export class RequestpostService {
             if (page) query.skip((page - 1) * limit);
         }
 
-        const requestPosts = await query.getMany();
+        const [requestPosts, count] = await query.getManyAndCount();
 
         return {
             results: requestPosts,
-            total: requestPosts.length,
+            total: count,
         };
     }
 
@@ -103,7 +164,7 @@ export class RequestpostService {
         return this.repo
             .createQueryBuilder('request_post')
             .leftJoinAndSelect('request_post.user', 'user')
-            .leftJoinAndSelect('request_post.payment_plan', 'payment_plan') 
+            .leftJoinAndSelect('request_post.payment_plan', 'payment_plan')
             .leftJoinAndSelect('request_post.upvoted_by', 'upvoted_user')
             .leftJoinAndSelect('request_post.downvoted_by', 'downvoted_user')
             .where('request_post.id = :id', { id })
@@ -132,7 +193,7 @@ export class RequestpostService {
                 HttpStatus.NOT_FOUND,
             );
         Object.assign(requestPost, attrs);
-        return this.repo.save(requestPost);
+        return await this.repo.save(requestPost);
     }
 
     async close(id: string) {
