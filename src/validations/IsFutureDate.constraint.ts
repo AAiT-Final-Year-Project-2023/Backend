@@ -7,12 +7,10 @@ import {
 
 @ValidatorConstraint({ name: 'IsFutureDate', async: true })
 @Injectable()
-export class IsFutureDateConstraint
-    implements ValidatorConstraintInterface
-{
+export class IsFutureDateConstraint implements ValidatorConstraintInterface {
     async validate(value: string, args: ValidationArguments) {
-       const date = new Date(value);
-       return date > new Date();
+        const date = new Date(value);
+        return date > new Date();
     }
 
     defaultMessage(args: ValidationArguments) {

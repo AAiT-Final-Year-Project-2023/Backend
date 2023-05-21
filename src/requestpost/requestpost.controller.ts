@@ -97,7 +97,7 @@ export class RequestpostController {
                 'Mobile query string must be one of: [true, false]',
                 HttpStatus.BAD_REQUEST,
             );
-        const platform = mobile && mobile == "true" ? true : false;
+        const platform = mobile && mobile == 'true' ? true : false;
         return this.requestPostService.find(
             page,
             limit,
@@ -165,6 +165,73 @@ export class RequestpostController {
             );
         }
         return this.requestPostService.remove(id);
+    }
+
+    @Get(':id/close')
+    async closeRequestPost(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @User() user: AuthorizedUserData,
+    ) {
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+        if (requestPost.user !== user.userId)
+            throw new HttpException(
+                'User not authorized',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        await this.requestPostService.makePrivate(requestPostId);
+        return this.requestPostService.close(requestPostId);
+    }
+
+    @Get(':id/makePrivate')
+    async makePrivate(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @User() user: AuthorizedUserData,
+    ) {
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+        if (requestPost.user !== user.userId)
+            throw new HttpException(
+                'User not authorized',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        return this.requestPostService.makePrivate(requestPostId);
+    }
+
+    @Get(':id/makePublic')
+    async makePublic(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @User() user: AuthorizedUserData,
+    ) {
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+        if (requestPost.user !== user.userId)
+            throw new HttpException(
+                'User not authorized',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        return this.requestPostService.makePublic(requestPostId);
     }
 
     // Contribution

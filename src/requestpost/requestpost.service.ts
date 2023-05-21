@@ -5,7 +5,7 @@ import { RequestPost } from './requestpost.entity';
 import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { FindPagination } from 'src/common/interfaces';
-import { DataTypeFilter, SortOrder } from 'src/common/defaults';
+import { DataTypeFilter, DatasetAccess, SortOrder } from 'src/common/defaults';
 
 @Injectable()
 export class RequestpostService {
@@ -74,7 +74,7 @@ export class RequestpostService {
                 'COALESCE(array_length(request_post.labels, 1), 0) = 0',
             );
 
-        if (limit){
+        if (limit) {
             query.take(limit);
             if (page) query.skip((page - 1) * limit);
         }
@@ -114,7 +114,7 @@ export class RequestpostService {
 
     async update(
         id: string,
-        attrs: Partial<UpdateRequestPostDto>,
+        attrs: Partial<RequestPost>,
     ): Promise<RequestPost> {
         const requestPost = await this.findById(id);
         if (!requestPost)
@@ -124,6 +124,45 @@ export class RequestpostService {
             );
         Object.assign(requestPost, attrs);
         return this.repo.save(requestPost);
+    }
+
+    async close(id: string) {
+        const requestPost = await this.findById(id);
+        if (!requestPost)
+            throw new HttpException(
+                'Request Post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        return await this.update(id, {
+            closed: true,
+        });
+    }
+
+    async makePrivate(id: string) {
+        const requestPost = await this.findById(id);
+        if (!requestPost)
+            throw new HttpException(
+                'Request Post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        return await this.update(id, {
+            access: DatasetAccess.PRIVATE,
+        });
+    }
+
+    async makePublic(id: string) {
+        const requestPost = await this.findById(id);
+        if (!requestPost)
+            throw new HttpException(
+                'Request Post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        return await this.update(id, {
+            access: DatasetAccess.PUBLIC,
+        });
     }
 
     async remove(id: string): Promise<RequestPost> {

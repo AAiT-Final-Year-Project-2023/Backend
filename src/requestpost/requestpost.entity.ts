@@ -61,6 +61,9 @@ export class RequestPost {
     })
     access: DatasetAccess;
 
+    @Column({ default: false })
+    closed: boolean;
+
     @OneToMany(() => Contribution, (contribution) => contribution.request_post)
     contributions: Contribution[];
 
