@@ -18,6 +18,7 @@ import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator'
 import { IsSupportedFileExtension } from 'src/decorators/IsSupportedFileExtension.decorator';
 import { IsValidExtensionForDatatype } from 'src/decorators/IsValidExtensionForDatatype.decorator';
 import { IsValidRequestPostDataSize } from 'src/decorators/IsValidRequestPostDataSize.decorator';
+import { IsFutureDate } from 'src/decorators/IsFutureDate.decorator';
 
 export class CreateRequestPostDto {
     @IsNotEmpty()
@@ -68,5 +69,6 @@ export class CreateRequestPostDto {
 
     @IsNotEmpty()
     @IsDateString()
+    @IsFutureDate()
     deadline: string;
 }

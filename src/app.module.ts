@@ -42,6 +42,7 @@ import { IsValidRequestPostDataSizeConstraint } from './validations/IsValidReque
 import { ChapaModule } from 'chapa-nestjs';
 import { PaymentModule } from './payment/payment.module';
 import { Payment } from './payment/payment.entity';
+import { IsFutureDateConstraint } from './validations/IsFutureDate.constraint';
 
 @Module({
     imports: [
@@ -131,6 +132,7 @@ import { Payment } from './payment/payment.entity';
         RequestPostExistsConstraint,
         IsValidEmailConstraint,
         IsValidRequestPostDataSizeConstraint,
+        IsFutureDateConstraint,
         {
             provide: APP_GUARD,
             useClass: JwtAuthGuard,
