@@ -11,6 +11,7 @@ import { VerifyUserDto } from './dtos/verify_user.dto';
 import { ResendVerificationCodeDto } from './dtos/resend_verification_code.dto';
 import { ChangePasswordDto } from './dtos/change_password.dto';
 import { VerifyChangePasswordDto } from './dtos/verify_change_password.dto';
+import { generateCodeAndExpiration } from 'src/common/functions';
 
 @Injectable()
 export class AuthService {
@@ -79,8 +80,7 @@ export class AuthService {
     }
 
     async signup(user: CreateUserDto) {
-        const { verificationCode, expiresIn } =
-            await this.generateCodeAndExpiration();
+        const { verificationCode, expiresIn } = generateCodeAndExpiration();
         const newUser = await this.userService.create(user);
         const password = await this.hash(user.password);
         await this.userService.update(newUser.id, {
@@ -156,8 +156,7 @@ export class AuthService {
             );
         }
 
-        const { verificationCode, expiresIn } =
-            await this.generateCodeAndExpiration();
+        const { verificationCode, expiresIn } = generateCodeAndExpiration();
         const updated = await this.userService.update(user.id, {
             email_verification_code: verificationCode,
             email_verification_code_expiration: expiresIn,
@@ -174,23 +173,7 @@ export class AuthService {
         };
     }
 
-    async generateCodeAndExpiration() {
-        const verificationCode = Math.floor(
-            100000 + Math.random() * 900000,
-        ).toString();
-        const expiresIn = new Date();
-        expiresIn.setMinutes(
-            expiresIn.getMinutes() + CodeExpiration.email_verification,
-        );
-
-        return {
-            verificationCode,
-            expiresIn,
-        };
-    }
-
     async changePassword(userId: string, data: ChangePasswordDto) {
-        console.log(userId);
         const user = await this.userService.findById(userId);
         if (!user) {
             throw new HttpException(
@@ -206,8 +189,7 @@ export class AuthService {
             );
         }
 
-        const { verificationCode, expiresIn } =
-            await this.generateCodeAndExpiration();
+        const { verificationCode, expiresIn } = generateCodeAndExpiration();
         const new_password = await this.hash(data.password);
         await this.userService.update(user.id, {
             new_password,

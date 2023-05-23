@@ -29,8 +29,8 @@ export enum DatasetAccess {
 
 // in minutes
 export enum CodeExpiration {
-    email_verification = 5,
-    change_password = 5,
+    email_verification = 15,
+    change_password = 15,
 }
 
 export enum NotificationType {

@@ -1,5 +1,5 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import validate from 'deep-email-validator';
 
@@ -20,13 +20,6 @@ export class EmailService {
         code: string,
         expiration: Date,
     ) {
-        // const isValidEmail = (await this.isValidEmail(to_email)).valid;
-        // if (!isValidEmail) {
-        //     throw new HttpException(
-        //         'Invalid email address',
-        //         HttpStatus.BAD_REQUEST,
-        //     );
-        // }
         const response = await this.mailerService.sendMail({
             to: to_email,
             from: this.configService.get<'string'>('EMAIL_USER'),
@@ -44,23 +37,16 @@ export class EmailService {
     async changePassword(
         to_email: string,
         username: string,
-        newPassword: string,
+        code: string,
         expiration: Date,
     ) {
-        // const isValidEmail = (await this.isValidEmail(to_email)).valid;
-        // if (!isValidEmail) {
-        //     throw new HttpException(
-        //         'Invalid email address',
-        //         HttpStatus.BAD_REQUEST,
-        //     );
-        // }
         const response = await this.mailerService.sendMail({
             to: to_email,
             from: this.configService.get<'string'>('EMAIL_USER'),
             subject: 'Change Password',
             template: 'change_password',
             context: {
-                newPassword,
+                code,
                 username,
                 expiration,
             },

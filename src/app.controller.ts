@@ -6,6 +6,8 @@ import { User } from './decorators/CurrentUser.decorator';
 import { AuthorizedUserData } from './common/interfaces';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from './common/defaults';
+import { AuthService } from './auth/auth.service';
+import { generateCodeAndExpiration } from './common/functions';
 
 @Controller()
 export class AppController {
@@ -21,8 +23,20 @@ export class AppController {
 
     @Post('test')
     @Public()
-    getHello(@User() user: AuthorizedUserData, @Req() req: any) {
-        console.log(req.body);
+    async getHello(@User() user: AuthorizedUserData, @Req() req: any) {
+        // const { verificationCode, expiresIn } = generateCodeAndExpiration();
+        // // await this.emailService.changePassword(
+        // //     '1segniadebatasisa@gmail.com',
+        // //     '1segniadebatasisa',
+        // //     verificationCode,
+        // //     expiresIn
+        // // );
+        // await this.emailService.verifyEmail(
+        //     '1segniadebatasisa@gmail.com',
+        //     '1segniadebatasisa',
+        //     verificationCode,
+        //     expiresIn,
+        // );
         return user;
     }
 

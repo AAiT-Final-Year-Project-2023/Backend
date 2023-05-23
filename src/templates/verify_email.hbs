@@ -178,7 +178,7 @@
             border-radius: 5px;
             box-sizing: border-box;
             color: #3498db;
-            cursor: pointer;
+            cursor: text;
             display: inline-block;
             font-size: 24px;
             font-weight: bold;
@@ -370,7 +370,7 @@
                                     <tr>
                                         <td>
                                             <p>Hi there,  {{username}}!</p>
-                                            <p>Click the following button to copy your email verification code.</p>
+                                            <p>Here is your email verification code.</p>
                                             <table role="presentation" border="0" cellpadding="0" cellspacing="0"
                                                 class="btn btn-primary">
                                                 <tbody>
@@ -390,7 +390,7 @@
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                            <p id="expiration">Expires in: <span id="expiration_countdown"></span></p>
+                                            <p id="expiration">Expires: <span id="expiration_countdown">{{expiration}}</span></p>
                                         </td>
                                     </tr>
                                 </table>
@@ -432,41 +432,20 @@
     const expirationElement = document.querySelector('#expiration');
 
     let expired = false;
-    let expiration = "{{expiration}}";
-    expiration = new Date(expiration);
+    const expiration = new Date("{{expiration}}");
 
-    var countdown = setInterval(() => {
-        let diff = expiration - new Date();
-        if(diff <= 0){
-            expired = true;
-            clearInterval(countdown);
-        }
-        if(!expired){
-            let result = difference2Parts(diff);
-            expirationCountdownElement.innerHTML = result.minutes + " : " + result.seconds + " minutes";
-        }else{
-            expirationElement.style.color = "red";
-            expirationElement.innerHTML ='Expired!';
-        }
-    }, 1000);
-
-    async function copyCode() {
-        const copyElement = document.querySelector('#code');
-        try{
-            {{!-- navigator.clipboard.writeText(copyElement.innerHTML); --}}
-            const code = copyElement.innerHTML;
-            copyElement.innerHTML = "Copied!"
-            setTimeout(() => {
-                copyElement.innerHTML = code;
-            }, 1500);
-            
-        }catch(e){
-            console.log("Could not copy text!")
-        }
+    let diff = expiration - new Date();
+    if(diff <= 0){
+        expired = true;
     }
-
+    if(!expired){
+        let result = difference2Parts(diff);
+        expirationCountdownElement.innerHTML = result.minutes + " : " + result.seconds + " minutes";
+    }else{
+        expirationElement.style.color = "red";
+        expirationElement.innerHTML ='Expired!';
+    }
     
-
     function difference2Parts(milliseconds) {
         const secs = Math.floor(Math.abs(milliseconds) / 1000);
         const mins = Math.floor(secs / 60);
@@ -495,6 +474,6 @@
                     multiple(`millisecond`, this.milliSeconds)}`;
                 },
         };
-        }
+    }
 </script>
 </html>
