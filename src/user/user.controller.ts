@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     HttpException,
     HttpStatus,
     Param,
@@ -129,5 +130,12 @@ export class UserController {
                 'PORT',
             )}/uploads/profile_images/${file.path}`,
         };
+    }
+
+    @Delete()
+    async deleteProfileImage(@User() user: AuthorizedUserData){
+        return this.userService.update(user.userId, {
+            image: ''
+        });
     }
 }

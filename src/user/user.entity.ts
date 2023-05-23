@@ -54,7 +54,7 @@ export class User {
     })
     status: string;
 
-    @Column({ nullable: true })
+    @Column({ default: '' })
     image: string;
 
     @Column({ default: 0 })

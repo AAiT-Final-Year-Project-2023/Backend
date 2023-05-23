@@ -47,6 +47,7 @@ export class AuthService {
 
     async googleSignin(user: GoogleUserInfo) {
         if (!user) return 'No user from google';
+        console.log(user);
 
         const userExists: User = await this.userService.findByEmail(user.email);
         if (userExists) return await this.signin(userExists);
@@ -60,6 +61,7 @@ export class AuthService {
         await this.userService.update(newUser.id, {
             google_authenticated: true,
             email_is_valid: true,
+            image: user.picture
         });
 
         return await this.signin(newUser);
