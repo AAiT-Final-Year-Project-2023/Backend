@@ -19,14 +19,14 @@ export class Contribution {
     id: string;
 
     @ManyToOne(() => User, (user) => user.contributions)
-    user: string;
+    user: User;
 
     @ManyToOne(() => RequestPost, (requestpost) => requestpost.contributions)
-    request_post: string;
+    request_post: RequestPost;
 
-    @OneToOne(() => Data, { cascade: true })
+    @OneToOne(() => Data)
     @JoinColumn()
-    data: string;
+    data: Data;
 
     @Column({
         type: 'enum',

@@ -78,7 +78,7 @@ import { IsFutureDateConstraint } from './validations/IsFutureDate.constraint';
             imports: [ConfigModule],
             inject: [ConfigService],
             useFactory: async (configService: ConfigService) => ({
-                secretKey: configService.get('CHAPA_SECRET_KEY'),
+                secretKey: configService.get('PRIVATE_CHAPA_API_KEY'),
             }),
         }),
         MailerModule.forRootAsync({

@@ -20,7 +20,7 @@ export class Dataset {
     id: string;
 
     @ManyToOne(() => User, (user) => user.datasets)
-    user: string;
+    user: User;
 
     @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
     payment_plan: PaymentPlan;

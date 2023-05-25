@@ -25,9 +25,8 @@ export class ContributionService {
             (column) => column.propertyName,
         );
         contributionColumns = contributionColumns.map(
-            (column) => `request_post.${column}`,
+            (column) => `contribution.${column}`,
         );
-        const size = await this.repo.count();
 
         const query = this.repo
             .createQueryBuilder('contribution')
@@ -39,6 +38,7 @@ export class ContributionService {
                 'user.username',
                 'user.email',
                 'user.image',
+                'data.id',
                 'data.type',
                 'data.size',
                 'data.extension',
@@ -54,16 +54,42 @@ export class ContributionService {
             if (page) query.skip((page - 1) * limit);
         }
 
-        const contributions = await query.getMany();
+        const [contributions, count] = await query.getManyAndCount();
 
         return {
             results: contributions,
-            total: size,
+            total: count,
         };
     }
 
     async findById(id: string): Promise<Contribution> {
-        return this.repo.findOne({ where: { id } });
+        const metadata = this.repo.metadata;
+        let contributionColumns = metadata.nonVirtualColumns.map(
+            (column) => column.propertyName,
+        );
+        contributionColumns = contributionColumns.map(
+            (column) => `contribution.${column}`,
+        );
+        return this.repo
+            .createQueryBuilder('contribution')
+            .leftJoinAndSelect('contribution.user', 'user')
+            .leftJoinAndSelect('contribution.request_post', 'request_post')
+            .leftJoinAndSelect('contribution.data', 'data')
+            .where('contribution.id = :id', { id })
+            .select([
+                ...contributionColumns,
+                'user.id',
+                'user.username',
+                'user.email',
+                'user.image',
+                'data.id',
+                'data.type',
+                'data.size',
+                'data.extension',
+                'request_post.id',
+                'request_post.title',
+            ])
+            .getOne();
     }
 
     async update(
@@ -81,12 +107,22 @@ export class ContributionService {
     }
 
     async remove(id: string): Promise<Contribution> {
-        const contribution = await this.findById(id);
+        const contribution = await this.repo
+            .createQueryBuilder('contribution')
+            .leftJoinAndSelect('contribution.data', 'data')
+            .where('contribution.id = :id', { id })
+            .getOne();
+
         if (!contribution)
             throw new HttpException(
                 'Contribution not found',
                 HttpStatus.NOT_FOUND,
             );
-        return this.repo.remove(contribution);
+
+        await this.repo.manager.transaction(async (manager) => {
+            await manager.remove(contribution);
+            await manager.remove(contribution.data);
+        });
+        return contribution;
     }
 }

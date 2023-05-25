@@ -62,7 +62,7 @@ export class AuthService {
         await this.userService.update(newUser.id, {
             google_authenticated: true,
             email_is_valid: true,
-            image: user.picture
+            image: user.picture,
         });
 
         return await this.signin(newUser);

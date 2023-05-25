@@ -20,10 +20,10 @@ export class RequestPost {
     id: string;
 
     @ManyToOne(() => User, (user) => user.request_posts)
-    user: string;
+    user: User;
 
     @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
-    payment_plan: string;
+    payment_plan: PaymentPlan;
 
     @Column()
     title: string;

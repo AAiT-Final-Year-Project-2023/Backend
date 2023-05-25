@@ -1,4 +1,4 @@
-import { CodeExpiration } from "./defaults";
+import { CodeExpiration } from './defaults';
 
 export const isValidUUID = (value: string) => {
     const regexExp =
@@ -29,4 +29,4 @@ export const generateCodeAndExpiration = () => {
         verificationCode,
         expiresIn,
     };
-}
+};

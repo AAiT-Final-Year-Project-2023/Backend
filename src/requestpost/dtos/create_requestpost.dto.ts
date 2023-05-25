@@ -70,5 +70,5 @@ export class CreateRequestPostDto {
     @IsNotEmpty()
     @IsDateString()
     @IsFutureDate()
-    deadline: string;
+    deadline: Date;
 }

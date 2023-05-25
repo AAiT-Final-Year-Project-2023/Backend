@@ -32,7 +32,7 @@ export class UpdatePaymentplanDto {
     @IsOptional()
     @IsNotEmpty()
     @IsNumber()
-    @IsPositive()
+    @Min(0)
     price: number;
 
     @IsOptional()

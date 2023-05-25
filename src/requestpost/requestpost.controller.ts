@@ -32,6 +32,7 @@ import {
     ContributionStatus,
     DataTypeFilter,
     DatasetAccess,
+    FilterContributionByStatus,
     NotificationType,
     Owner,
     SortOrder,
@@ -43,6 +44,7 @@ import { EnumValidationPipe } from 'src/pipes/EnumValidation.pipe';
 import { enumToString } from 'src/common/functions';
 import { UserService } from 'src/user/user.service';
 import { User as userEntity } from 'src/user/user.entity';
+import { Public } from 'src/decorators/IsPublicRoute.decorator';
 
 @Controller('requestpost')
 export class RequestpostController {
@@ -60,7 +62,17 @@ export class RequestpostController {
         @Body() body: CreateRequestPostDto,
         @User() user: AuthorizedUserData,
     ) {
-        return this.requestPostService.create(body, user.userId);
+        const currUser = await this.userService.findById(user.userId);
+        const paymentPlan = await this.paymentPlanService.findById(
+            body.payment_plan,
+        );
+        return this.requestPostService.create(
+            {
+                ...body,
+                payment_plan: paymentPlan,
+            },
+            currUser,
+        );
     }
 
     @Get()
@@ -146,7 +158,7 @@ export class RequestpostController {
             sortByDate,
             sortByUpvotes,
             sortByDownvotes,
-            owner === Owner.SELF ? user.userId : undefined,
+            owner === Owner.ME ? user.userId : undefined,
             isMobile,
             isClosed,
         );
@@ -160,7 +172,7 @@ export class RequestpostController {
         const requestPost = await this.requestPostService.findById(id);
         if (
             requestPost.access === DatasetAccess.PRIVATE &&
-            requestPost.user['id'] !== user.userId
+            requestPost.user.id !== user.userId
         )
             throw new HttpException(
                 'User unauthorized',
@@ -177,7 +189,7 @@ export class RequestpostController {
         @User() user: AuthorizedUserData,
     ) {
         const requestPost = await this.requestPostService.findById(id);
-        if (requestPost && requestPost.user['id'] !== user.userId) {
+        if (requestPost && requestPost.user.id !== user.userId) {
             throw new HttpException(
                 'User unauthorized',
                 HttpStatus.UNAUTHORIZED,
@@ -196,7 +208,7 @@ export class RequestpostController {
                     );
             } else {
                 let paymentPlan = await this.paymentPlanService.findById(
-                    requestPost.payment_plan['id'],
+                    requestPost.payment_plan.id,
                 );
                 if (body.data_size >= paymentPlan.disk_size)
                     throw new HttpException(
@@ -206,7 +218,14 @@ export class RequestpostController {
             }
         }
 
-        return this.requestPostService.update(id, body);
+        let paymentPlan = await this.paymentPlanService.findById(
+            body.payment_plan,
+        );
+
+        return this.requestPostService.update(id, {
+            ...body,
+            payment_plan: paymentPlan,
+        });
     }
 
     @Delete(':id')
@@ -215,7 +234,7 @@ export class RequestpostController {
         @User() user: AuthorizedUserData,
     ) {
         const requestPost = await this.requestPostService.findById(id);
-        if (requestPost && requestPost.user['id'] !== user.userId) {
+        if (requestPost && requestPost.user.id !== user.userId) {
             throw new HttpException(
                 'User unauthorized',
                 HttpStatus.UNAUTHORIZED,
@@ -238,7 +257,7 @@ export class RequestpostController {
                 HttpStatus.NOT_FOUND,
             );
 
-        if (requestPost.user['id'] !== user.userId)
+        if (requestPost.user.id !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -261,7 +280,7 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user['id'] !== user.userId)
+        if (requestPost.user.id !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -283,7 +302,7 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user['id'] !== user.userId)
+        if (requestPost.user.id !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -314,6 +333,63 @@ export class RequestpostController {
         return this.requestPostService.downvote(requestPostId, userEntity);
     }
 
+    @Public()
+    @Get(':id/diskUsage')
+    async diskUsage(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @User() user: AuthorizedUserData,
+        @Query(
+            'status',
+            new EnumValidationPipe(
+                FilterContributionByStatus,
+                `status input has to be one of: [${enumToString(
+                    FilterContributionByStatus,
+                )}]`,
+            ),
+        )
+        status?: FilterContributionByStatus,
+    ) {
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+        return this.requestPostService.diskUsage(requestPostId, status);
+    }
+
+    @Public()
+    @Get(':id/contributionsCount')
+    async contributionsCount(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @User() user: AuthorizedUserData,
+        @Query(
+            'status',
+            new EnumValidationPipe(
+                FilterContributionByStatus,
+                `status input has to be one of: [${enumToString(
+                    FilterContributionByStatus,
+                )}]`,
+            ),
+        )
+        status?: FilterContributionByStatus,
+    ) {
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+        return this.requestPostService.requestPostContributionsCount(
+            requestPostId,
+            status,
+        );
+    }
+
     // Contribution
     @Post(':id/contribution/upload')
     @UseInterceptors(FileInterceptor('file'))
@@ -334,7 +410,7 @@ export class RequestpostController {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
-        if (user.userId === requestPost.user['id']) {
+        if (user.userId === requestPost.user.id) {
             if (existsSync(file.path)) unlinkSync(file.path);
             throw new HttpException(
                 'Cannot contribute to this Request Post',
@@ -346,7 +422,7 @@ export class RequestpostController {
         if (requestPost.closed) {
             if (existsSync(file.path)) unlinkSync(file.path);
             throw new HttpException(
-                'Cannot contribute to this Request Post',
+                'Cannot contribute to a closed Request Post',
                 HttpStatus.BAD_REQUEST,
             );
         }
@@ -355,12 +431,25 @@ export class RequestpostController {
         if (requestPost.access === DatasetAccess.PRIVATE) {
             if (existsSync(file.path)) unlinkSync(file.path);
             throw new HttpException(
-                'Cannot contribute to this Request Post',
+                'Cannot contribute to a private Request Post',
                 HttpStatus.BAD_REQUEST,
             );
         }
 
-        // Warn the user if the size of the contributed files is getting too full ??????????????????????????????????
+        // cannot contribute if a user hasn't setup their bank information
+        const currUser = await this.userService.findById(user.userId);
+        if (!currUser) {
+            if (existsSync(file.path)) unlinkSync(file.path);
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+
+        // if (!currUser.bank_information){
+        //     if (existsSync(file.path)) unlinkSync(file.path);
+        //     throw new HttpException(
+        //         'Bank information not set',
+        //         HttpStatus.BAD_REQUEST,
+        //     );
+        // }
 
         // validate the data type and uploaded file's size
         const bodyInstance = plainToInstance(CreateContributionDto, body);
@@ -376,12 +465,36 @@ export class RequestpostController {
         // validate the body, if valid delete the file
         const { size, mimetype } = file;
 
-        if (requestPost.data_size > size) {
+        if (requestPost.data_size < size) {
             if (existsSync(file.path)) unlinkSync(file.path);
             throw new HttpException(
                 `Contribution file too big, maximum allowed for this request post: ${requestPost.data_size} bytes`,
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.PAYLOAD_TOO_LARGE,
             );
+        }
+
+        // check if the payment plan has free space or not
+        const { used, total } = await this.requestPostService.diskUsage(
+            requestPostId,
+            FilterContributionByStatus.ACCEPTED,
+        );
+        // check if it's full
+        if (size + used > total) {
+            throw new HttpException(
+                `Contribution file too big, request post space is running out: ${used} / ${total} bytes`,
+                HttpStatus.PAYLOAD_TOO_LARGE,
+            );
+        }
+
+        // send warning notification if it's above 80%
+        const percentageUsed: number = (used / total) * 100;
+
+        if (percentageUsed > 95) {
+            // await this.notificationService.create({
+            //     title: NotificationType.SPACE_USAGE_WARNING,
+            //     from_user: user.userId,
+            //     user: requestPost.user.id,
+            // });
         }
 
         const [datatype, extension] = mimetype.split('/');
@@ -400,7 +513,6 @@ export class RequestpostController {
         // create the data and contribution
         let data = null;
 
-        // maybe create DTOs for them - Data and Contribution - and validate?
         try {
             data = await this.dataService.create({
                 information: bodyInstance.data_information,
@@ -431,9 +543,9 @@ export class RequestpostController {
             contribution = this.contributionService.create({
                 data: data.id,
                 earning: 0,
-                request_post: requestPost.id,
+                request_post: requestPost,
                 status: ContributionStatus.PENDING,
-                user: user.userId,
+                user: currUser,
             });
         } catch (error) {
             if (existsSync(file.path)) unlinkSync(file.path);
@@ -451,22 +563,38 @@ export class RequestpostController {
             );
         }
 
-        await this.notificationService.create({
-            title: NotificationType.CONTRIBUTION_MADE,
-            from_user: user.userId,
-            user: requestPost.id,
-        });
+        // await this.notificationService.create({
+        //     title: NotificationType.CONTRIBUTION_MADE,
+        //     from_user: user.userId,
+        //     user: requestPost.user.id,
+        // });
 
         return contribution;
     }
 
     @Get(':id/contribution/')
-    async findContribution(
+    async findContributions(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @Query('page', ParseIntPipe) page?: number,
         @Query('limit') limit?: number,
     ) {
         return this.contributionService.find(requestPostId, page, limit);
+    }
+
+    @Get(':id/contribution/:contributionId')
+    async findContribution(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @Param('contributionId', ParseUUIDPipe) contributionId: string,
+    ) {
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+        return this.contributionService.findById(contributionId);
     }
 
     @Put(':id/contribution/:contributionId/accept')
@@ -483,7 +611,7 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user['id'] !== user.userId)
+        if (requestPost.user.id !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -498,11 +626,17 @@ export class RequestpostController {
                 HttpStatus.NOT_FOUND,
             );
 
-        await this.notificationService.create({
-            title: NotificationType.CONTRIBUTION_ACCEPTED,
-            from_user: user.userId,
-            user: contribution.user,
-        });
+        if (contribution.status !== ContributionStatus.PENDING)
+            throw new HttpException(
+                `Contribution is already ${contribution.status}`,
+                HttpStatus.BAD_REQUEST,
+            );
+
+        // await this.notificationService.create({
+        //     title: NotificationType.CONTRIBUTION_ACCEPTED,
+        //     from_user: user.userId,
+        //     user: contribution.user.id,
+        // });
 
         return this.contributionService.update(contribution.id, {
             status: ContributionStatus.ACCEPTED,
@@ -523,7 +657,7 @@ export class RequestpostController {
                 'Request post not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (requestPost.user['id'] !== user.userId)
+        if (requestPost.user.id !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -538,11 +672,17 @@ export class RequestpostController {
                 HttpStatus.NOT_FOUND,
             );
 
-        await this.notificationService.create({
-            title: NotificationType.CONTRIBUTION_REJECTED,
-            from_user: user.userId,
-            user: contribution.user,
-        });
+        if (contribution.status !== ContributionStatus.PENDING)
+            throw new HttpException(
+                `Contribution is already ${contribution.status}`,
+                HttpStatus.BAD_REQUEST,
+            );
+
+        // await this.notificationService.create({
+        //     title: NotificationType.CONTRIBUTION_REJECTED,
+        //     from_user: user.userId,
+        //     user: contribution.user,
+        // });
 
         return this.contributionService.update(contribution.id, {
             status: ContributionStatus.REJECTED,
@@ -564,23 +704,38 @@ export class RequestpostController {
                 HttpStatus.NOT_FOUND,
             );
 
-        if (requestPost && requestPost.user['id'] !== user.userId) {
-            throw new HttpException(
-                'User unauthorized',
-                HttpStatus.UNAUTHORIZED,
-            );
-        }
-
         const contribution = await this.contributionService.findById(
             contributionId,
         );
-        if (!contribution || contribution.request_post !== requestPost.id) {
+
+        if (
+            !contribution ||
+            contribution.request_post.id !== requestPost.id
+        ) {
             throw new HttpException(
                 'Contribution not found',
                 HttpStatus.NOT_FOUND,
             );
         }
 
-        return this.contributionService.remove(contribution.id);
+        if (contribution.user.id !== user.userId) {
+            throw new HttpException(
+                'User unauthorized',
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
+        if(contribution.status === ContributionStatus.ACCEPTED){
+            throw new HttpException('Cannot delete an accepted contribution', HttpStatus.BAD_REQUEST);
+        }
+
+        const data = await this.dataService.findById(contribution.data.id);
+        const fileLocation = data.src;
+        const deletedContribution = this.contributionService.remove(
+            contribution.id,
+        );
+        if (deletedContribution && existsSync(fileLocation))
+            unlinkSync(fileLocation);
+        return deletedContribution;
     }
 }

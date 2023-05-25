@@ -133,9 +133,9 @@ export class UserController {
     }
 
     @Delete()
-    async deleteProfileImage(@User() user: AuthorizedUserData){
+    async deleteProfileImage(@User() user: AuthorizedUserData) {
         return this.userService.update(user.userId, {
-            image: ''
+            image: '',
         });
     }
 }

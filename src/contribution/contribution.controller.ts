@@ -48,7 +48,7 @@ export class ContributionController {
                 'Contribution not found',
                 HttpStatus.NOT_FOUND,
             );
-        if (contribution.user !== user.userId)
+        if (contribution.user.id !== user.userId)
             throw new HttpException(
                 'User unauthorized',
                 HttpStatus.UNAUTHORIZED,
@@ -59,7 +59,7 @@ export class ContributionController {
                 HttpStatus.BAD_REQUEST,
             );
 
-        const data = await this.dataService.findById(contribution.data);
+        const data = await this.dataService.findById(contribution.data.id);
         if (data) {
             const fileSrc = data.src;
             if (existsSync(fileSrc)) unlinkSync(fileSrc);

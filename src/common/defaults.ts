@@ -39,6 +39,7 @@ export enum NotificationType {
     CONTRIBUTION_ACCEPTED = 'contribution accepted',
     CONTRIBUTION_REJECTED = 'contribution rejected',
     PAYMENT_ACCEPTED = 'payment accepted',
+    SPACE_USAGE_WARNING = 'space usage warning',
 }
 
 export enum DataTypeFilter {
@@ -55,6 +56,13 @@ export enum SortOrder {
 }
 
 export enum Owner {
-    SELF = 'self',
+    ME = 'me',
     ALL = 'all',
+}
+
+export enum FilterContributionByStatus {
+    ALL = 'all',
+    PENDING = 'pending',
+    ACCEPTED = 'accepted',
+    REJECTED = 'rejected',
 }

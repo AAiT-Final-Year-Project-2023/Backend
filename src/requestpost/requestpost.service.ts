@@ -6,10 +6,12 @@ import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { FindPagination } from 'src/common/interfaces';
 import {
+    ContributionStatus,
     DataTypeFilter,
     DatasetAccess,
     Owner,
     SortOrder,
+    FilterContributionByStatus,
 } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
 
@@ -20,14 +22,31 @@ export class RequestpostService {
     ) {}
 
     async create(
-        requestPost: CreateRequestPostDto,
-        userId: string,
+        requestPost: Partial<RequestPost>,
+        user: User,
     ): Promise<RequestPost> {
+        const metadata = this.repo.metadata;
+        let requestPostColumns = metadata.nonVirtualColumns.map(
+            (column) => column.propertyName,
+        );
+        requestPostColumns = requestPostColumns.map(
+            (column) => `request_post.${column}`,
+        );
+
         const newRequestPost = this.repo.create({
-            user: userId,
             ...requestPost,
+            user,
         });
-        return this.repo.save(newRequestPost);
+
+        const query = this.repo
+            .createQueryBuilder('request_post')
+            .insert()
+            .values(newRequestPost)
+            .returning(['request_post.id']);
+        const result = await query.execute();
+        const insertedRowId = result.identifiers[0].id;
+
+        return await this.findById(insertedRowId);
     }
 
     async find(
@@ -67,6 +86,8 @@ export class RequestpostService {
             .leftJoinAndSelect('request_post.payment_plan', 'payment_plan')
             .leftJoinAndSelect('request_post.upvoted_by', 'upvoted_user')
             .leftJoinAndSelect('request_post.downvoted_by', 'downvoted_user')
+            .leftJoin('request_post.contributions', 'contribution')
+            .leftJoin('contribution.data', 'data')
             .select([
                 ...requestPostColumns,
                 'user.id',
@@ -75,9 +96,11 @@ export class RequestpostService {
                 'user.image',
                 'payment_plan.id',
                 'payment_plan.title',
+                'payment_plan.disk_size',
                 'upvoted_user.id',
                 'downvoted_user.id',
             ])
+            .addSelect('COALESCE(SUM(data.size), 0)', 'used_disk_space')
             .addSelect('upvotes.upvotes', 'upvotes')
             .addSelect('downvotes.downvotes', 'downvotes')
             .leftJoin(
@@ -170,12 +193,13 @@ export class RequestpostService {
             .where('request_post.id = :id', { id })
             .select([
                 ...requestPostColumns,
-                'payment_plan.id',
                 'user.id',
-                'payment_plan.title',
                 'user.username',
                 'user.email',
                 'user.image',
+                'payment_plan.id',
+                'payment_plan.title',
+                'payment_plan.disk_size',
                 'upvoted_user.id',
                 'downvoted_user.id',
             ])
@@ -381,6 +405,69 @@ export class RequestpostService {
                 'downvoted_user.id',
             ])
             .getOne();
+    }
+
+    async diskUsage(
+        id: string,
+        status?: FilterContributionByStatus,
+    ): Promise<{ used: number; total: number }> {
+        const disk_size_query = this.repo
+            .createQueryBuilder('request_post')
+            .select('payment_plan.disk_size', 'disk_size')
+            .leftJoin('request_post.payment_plan', 'payment_plan')
+            .where('request_post.id = :id', { id })
+            .groupBy('request_post.id, payment_plan.disk_size');
+
+        const { disk_size } = await disk_size_query.getRawOne();
+
+        const query = this.repo
+            .createQueryBuilder('request_post')
+            .select('COALESCE(SUM(data.size), 0)', 'sum')
+            .addSelect('payment_plan.disk_size', 'disk_size')
+            .leftJoin('request_post.contributions', 'contribution')
+            .leftJoin('contribution.data', 'data')
+            .leftJoin('request_post.payment_plan', 'payment_plan')
+            .where('request_post.id = :id', { id })
+            .groupBy('request_post.id, payment_plan.disk_size');
+
+        if (status && status !== FilterContributionByStatus.ALL) {
+            query.andWhere('contribution.status = :status', { status });
+        }
+
+        const result = await query.getRawOne();
+        let used = undefined;
+        if (result) {
+            let { sum } = result;
+            used = sum;
+        }
+
+        const data = {
+            used: parseInt(used) || 0,
+            total: parseInt(disk_size) || 0,
+        };
+
+        return data;
+    }
+
+    async requestPostContributionsCount(
+        id: string,
+        status?: FilterContributionByStatus,
+    ): Promise<number> {
+        const query = this.repo
+            .createQueryBuilder('request_post')
+            .select('COUNT(contribution.id)', 'count')
+            .leftJoin('request_post.contributions', 'contribution')
+            .where('request_post.id = :id', { id })
+            .groupBy('request_post.id');
+
+        if (status && status !== FilterContributionByStatus.ALL) {
+            query.andWhere('contribution.status = :status', { status });
+        }
+
+        const result = await query.getRawOne();
+        if (!result) return 0;
+        const count = parseInt(result.count);
+        return count;
     }
 
     async remove(id: string): Promise<RequestPost> {
