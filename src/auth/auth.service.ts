@@ -48,7 +48,6 @@ export class AuthService {
 
     async googleSignin(user: GoogleUserInfo) {
         if (!user) return 'No user from google';
-        console.log(user);
 
         const userExists: User = await this.userService.findByEmail(user.email);
         if (userExists) return await this.signin(userExists);

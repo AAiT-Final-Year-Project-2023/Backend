@@ -41,10 +41,11 @@ import { Contribution } from 'src/contribution/contribution.entity';
 import { NotificationService } from 'src/notification/notification.service';
 import { StringLengthValidationPipe } from 'src/pipes/StringLengthValidation.pipe';
 import { EnumValidationPipe } from 'src/pipes/EnumValidation.pipe';
-import { enumToString } from 'src/common/functions';
+import { deleteFolderRecursive, enumToString } from 'src/common/functions';
 import { UserService } from 'src/user/user.service';
 import { User as userEntity } from 'src/user/user.entity';
 import { Public } from 'src/decorators/IsPublicRoute.decorator';
+import { OptionalBooleanPipe } from 'src/pipes/OptionalBoolean.pipe';
 
 @Controller('requestpost')
 export class RequestpostController {
@@ -133,23 +134,9 @@ export class RequestpostController {
             ),
         )
         owner?: Owner,
-        @Query('mobile') mobile?: string,
-        @Query('closed') closed?: string,
+        @Query('mobile', new OptionalBooleanPipe()) mobile: boolean = undefined,
+        @Query('closed', new OptionalBooleanPipe()) closed: boolean = undefined,
     ) {
-        if (mobile && !['true', 'false'].includes(mobile))
-            throw new HttpException(
-                'Mobile query string must be one of: [true, false]',
-                HttpStatus.BAD_REQUEST,
-            );
-        const isMobile = mobile && mobile == 'true' ? true : false;
-
-        if (closed && !['true', 'false'].includes(closed))
-            throw new HttpException(
-                'Closed query string must be one of: [true, false]',
-                HttpStatus.BAD_REQUEST,
-            );
-        const isClosed = closed && closed == 'true' ? true : false;
-
         return this.requestPostService.find(
             page,
             limit,
@@ -159,8 +146,8 @@ export class RequestpostController {
             sortByUpvotes,
             sortByDownvotes,
             owner === Owner.ME ? user.userId : undefined,
-            isMobile,
-            isClosed,
+            mobile,
+            closed,
         );
     }
 
@@ -240,7 +227,14 @@ export class RequestpostController {
                 HttpStatus.UNAUTHORIZED,
             );
         }
-        return this.requestPostService.remove(id);
+        const deletedRequestPost = await this.requestPostService.remove(id);
+
+        const requestPostDataFolderPath = `./uploads/request_posts/${requestPost.id}`;
+        if (deletedRequestPost) {
+            deleteFolderRecursive(requestPostDataFolderPath);
+        }
+
+        return requestPost;
     }
 
     @Get(':id/close')
@@ -263,7 +257,6 @@ export class RequestpostController {
                 HttpStatus.UNAUTHORIZED,
             );
 
-        await this.requestPostService.makePrivate(requestPostId);
         return this.requestPostService.close(requestPostId);
     }
 
@@ -708,10 +701,7 @@ export class RequestpostController {
             contributionId,
         );
 
-        if (
-            !contribution ||
-            contribution.request_post.id !== requestPost.id
-        ) {
+        if (!contribution || contribution.request_post.id !== requestPost.id) {
             throw new HttpException(
                 'Contribution not found',
                 HttpStatus.NOT_FOUND,
@@ -723,10 +713,6 @@ export class RequestpostController {
                 'User unauthorized',
                 HttpStatus.UNAUTHORIZED,
             );
-        }
-
-        if(contribution.status === ContributionStatus.ACCEPTED){
-            throw new HttpException('Cannot delete an accepted contribution', HttpStatus.BAD_REQUEST);
         }
 
         const data = await this.dataService.findById(contribution.data.id);

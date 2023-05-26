@@ -1,4 +1,6 @@
 import { CodeExpiration } from './defaults';
+import { existsSync, lstatSync, readdirSync, rmdirSync, unlinkSync } from 'fs';
+import { join } from 'path';
 
 export const isValidUUID = (value: string) => {
     const regexExp =
@@ -30,3 +32,17 @@ export const generateCodeAndExpiration = () => {
         expiresIn,
     };
 };
+
+export function deleteFolderRecursive(folderPath) {
+    if (existsSync(folderPath)) {
+        readdirSync(folderPath).forEach((file) => {
+            const curPath = join(folderPath, file);
+            if (lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath);
+            } else {
+                unlinkSync(curPath);
+            }
+        });
+        rmdirSync(folderPath);
+    }
+}

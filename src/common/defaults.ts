@@ -13,6 +13,7 @@ export enum ContributionStatus {
     PENDING = 'pending',
     ACCEPTED = 'accepted',
     REJECTED = 'rejected',
+    DELETED_REQUEST_POST = 'deleted request post',
 }
 
 export enum DataType {

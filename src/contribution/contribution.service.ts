@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindPagination } from 'src/common/interfaces';
 import { Repository } from 'typeorm';
 import { Contribution } from './contribution.entity';
+import { ContributionStatus } from 'src/common/defaults';
 
 @Injectable()
 export class ContributionService {
@@ -49,12 +50,14 @@ export class ContributionService {
                 request_post: requestPostId,
             });
 
+        const count = await query.getCount();
+
         if (limit) {
             query.take(limit);
             if (page) query.skip((page - 1) * limit);
         }
 
-        const [contributions, count] = await query.getManyAndCount();
+        const contributions = await query.getMany();
 
         return {
             results: contributions,
@@ -118,6 +121,13 @@ export class ContributionService {
                 'Contribution not found',
                 HttpStatus.NOT_FOUND,
             );
+
+        if (contribution.status === ContributionStatus.ACCEPTED) {
+            throw new HttpException(
+                'Cannot delete an accepted contribution',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
 
         await this.repo.manager.transaction(async (manager) => {
             await manager.remove(contribution);

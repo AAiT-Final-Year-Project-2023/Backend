@@ -2,18 +2,17 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RequestPost } from './requestpost.entity';
-import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
-import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { FindPagination } from 'src/common/interfaces';
 import {
-    ContributionStatus,
     DataTypeFilter,
     DatasetAccess,
-    Owner,
     SortOrder,
     FilterContributionByStatus,
+    ContributionStatus,
 } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
+import { Data } from 'src/data/data.entity';
+import { Contribution } from 'src/contribution/contribution.entity';
 
 @Injectable()
 export class RequestpostService {
@@ -163,12 +162,14 @@ export class RequestpostService {
                 'COALESCE(array_length(request_post.labels, 1), 0) = 0',
             );
 
+        const count = await query.getCount();
+
         if (limit) {
             query.take(limit);
             if (page) query.skip((page - 1) * limit);
         }
 
-        const [requestPosts, count] = await query.getManyAndCount();
+        const requestPosts = await query.getMany();
 
         return {
             results: requestPosts,
@@ -230,6 +231,7 @@ export class RequestpostService {
 
         return await this.update(id, {
             closed: true,
+            access: DatasetAccess.PRIVATE,
         });
     }
 
@@ -471,12 +473,46 @@ export class RequestpostService {
     }
 
     async remove(id: string): Promise<RequestPost> {
-        const requestPost = await this.findById(id);
-        if (!requestPost)
-            throw new HttpException(
-                'Request Post not found',
-                HttpStatus.NOT_FOUND,
+        return await this.repo.manager.transaction(async (trxManager) => {
+            const requestPost = await trxManager.findOne(RequestPost, {
+                where: { id },
+                relations: [
+                    'contributions',
+                    'contributions.data',
+                    'upvoted_by',
+                    'downvoted_by',
+                ],
+            });
+
+            if (!requestPost)
+                throw new HttpException(
+                    `Request post with ID ${id} not found`,
+                    HttpStatus.NOT_FOUND,
+                );
+            for (const contribution of requestPost.contributions) {
+                if (contribution.data) {
+                    const data = contribution.data;
+                    contribution.data = null;
+                    await trxManager.save(contribution);
+                    await trxManager.remove(data);
+                }
+                contribution.status = ContributionStatus.DELETED_REQUEST_POST;
+                await trxManager.save(contribution);
+            }
+
+            requestPost.upvoted_by = [];
+            requestPost.downvoted_by = [];
+            await trxManager.save(requestPost);
+
+            await trxManager.update(
+                Contribution,
+                { request_post: requestPost },
+                { request_post: null },
             );
-        return this.repo.remove(requestPost);
+
+            // Delete the request post
+            await trxManager.delete(RequestPost, id);
+            return requestPost;
+        });
     }
 }
