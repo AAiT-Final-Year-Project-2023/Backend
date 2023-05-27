@@ -21,5 +21,4 @@ export class UpdateBankinformationDto extends PartialType(
     @IsString()
     @IsValidBankId()
     bank_id: string;
-
 }

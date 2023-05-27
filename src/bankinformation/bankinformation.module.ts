@@ -7,7 +7,11 @@ import { PaymentModule } from 'src/payment/payment.module';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([BankInformation]), PaymentModule, UserModule],
+    imports: [
+        TypeOrmModule.forFeature([BankInformation]),
+        PaymentModule,
+        UserModule,
+    ],
     providers: [BankinformationService],
     controllers: [BankinformationController],
 })

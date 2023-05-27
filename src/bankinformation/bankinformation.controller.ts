@@ -86,9 +86,7 @@ export class BankinformationController {
     }
 
     @Delete()
-    async delete(
-        @User() user: AuthorizedUserData
-    ): Promise<BankInformation> {
+    async delete(@User() user: AuthorizedUserData): Promise<BankInformation> {
         const currUser = await this.userService.findById(user.userId);
         if (!currUser)
             throw new HttpException(
@@ -100,7 +98,9 @@ export class BankinformationController {
                 'Bank information not found',
                 HttpStatus.NOT_FOUND,
             );
-        
-        return await this.bankInformationService.remove(currUser.bank_information.id);
+
+        return await this.bankInformationService.remove(
+            currUser.bank_information.id,
+        );
     }
 }

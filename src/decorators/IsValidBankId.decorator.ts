@@ -12,4 +12,3 @@ export function IsValidBankId(validationOptions?: ValidationOptions) {
         });
     };
 }
-
