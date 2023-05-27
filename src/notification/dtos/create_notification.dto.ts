@@ -1,23 +1,22 @@
-import {
-    IsEnum,
-    IsNotEmpty,
-    IsString,
-    IsUUID,
-    MaxLength,
-} from 'class-validator';
+import { Optional } from '@nestjs/common';
+import { IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { NotificationType } from 'src/common/defaults';
 import { UserExists } from 'src/decorators/UserExists.decorator';
+import { User } from 'src/user/user.entity';
 
 export class CreateNotificationDto {
     @IsUUID()
     @IsNotEmpty()
     @UserExists()
-    user: string;
+    to: User;
 
     @IsUUID()
     @IsNotEmpty()
     @UserExists()
-    from_user: string;
+    from: User;
+
+    @IsString()
+    describtion: string;
 
     @IsEnum(NotificationType)
     @IsNotEmpty()

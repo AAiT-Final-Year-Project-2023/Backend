@@ -27,7 +27,7 @@ export class NotificationController {
                 HttpStatus.NOT_FOUND,
             );
 
-        if (user.userId !== notification.user)
+        if (user.userId !== notification.to.id)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
@@ -49,7 +49,7 @@ export class NotificationController {
                 HttpStatus.NOT_FOUND,
             );
 
-        if (user.userId !== notification.user)
+        if (user.userId !== notification.to.id)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,

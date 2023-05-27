@@ -1,3 +1,4 @@
+import { NotificationType } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
 import {
     Column,
@@ -5,7 +6,6 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
-    OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
@@ -16,14 +16,18 @@ export class Notification {
     id: string;
 
     @ManyToOne(() => User, (user) => user.notifications)
-    user: string;
+    @JoinColumn({ name: 'to_user_id' })
+    to: User;
 
-    @OneToOne(() => User)
-    @JoinColumn()
-    from_user: string;
+    @ManyToOne(() => User)
+    @JoinColumn({ name: 'from_user_id' })
+    from: User;
 
     @Column()
-    title: string;
+    title: NotificationType;
+
+    @Column()
+    describtion: string;
 
     @Column({ default: false })
     seen: boolean;

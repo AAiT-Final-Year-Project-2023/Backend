@@ -12,7 +12,13 @@ export class BankInformation {
     id: string;
 
     @Column()
-    chapa_info: string;
+    account_name: string;
+
+    @Column()
+    account_number: string;
+
+    @Column()
+    bank_code: string;
 
     @CreateDateColumn()
     created_at: Date;

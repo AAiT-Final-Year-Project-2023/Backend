@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateNotificationDto } from './dtos/create_notification.dto';
 import { User } from 'src/user/user.entity';
 import { Notification } from './notification.entity';
+import { CreateNotificationDto } from './dtos/create_notification.dto';
 
 @Injectable()
 export class NotificationService {

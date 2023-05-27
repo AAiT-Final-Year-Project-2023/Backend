@@ -3,8 +3,8 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Payment } from './payment.entity';
 import {
     ChapaService,
+    GetBanksResponse,
     InitializeResponse,
-    VerifyOptions,
     VerifyResponse,
 } from 'chapa-nestjs';
 
@@ -49,7 +49,7 @@ export class PaymentService {
         });
     }
 
-    async getBanks() {
+    async getBanks(): Promise<GetBanksResponse> {
         const response = await this.chapaService.getBanks();
         return response;
     }

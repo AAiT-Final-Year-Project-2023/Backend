@@ -25,7 +25,7 @@ import { CreateContributionDto } from 'src/contribution/dtos/create_contribution
 import { validate } from 'class-validator';
 import { existsSync, unlinkSync } from 'fs';
 import { User } from 'src/decorators/CurrentUser.decorator';
-import { AuthorizedUserData } from 'src/common/interfaces';
+import { AuthorizedUserData, FindPagination } from 'src/common/interfaces';
 import { PaymentplansService } from 'src/paymentplan/paymentplan.service';
 import { DataService } from 'src/data/data.service';
 import {
@@ -46,6 +46,8 @@ import { UserService } from 'src/user/user.service';
 import { User as userEntity } from 'src/user/user.entity';
 import { Public } from 'src/decorators/IsPublicRoute.decorator';
 import { OptionalBooleanPipe } from 'src/pipes/OptionalBoolean.pipe';
+import { RequestPost } from './requestpost.entity';
+import { Data } from 'src/data/data.entity';
 
 @Controller('requestpost')
 export class RequestpostController {
@@ -62,18 +64,30 @@ export class RequestpostController {
     async create(
         @Body() body: CreateRequestPostDto,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<RequestPost> {
         const currUser = await this.userService.findById(user.userId);
         const paymentPlan = await this.paymentPlanService.findById(
             body.payment_plan,
         );
-        return this.requestPostService.create(
+
+        const newRequestPost = await this.requestPostService.create(
             {
                 ...body,
                 payment_plan: paymentPlan,
             },
             currUser,
         );
+
+        if (newRequestPost && currUser) {
+            await this.notificationService.create({
+                to: currUser,
+                from: null,
+                title: NotificationType.REQUEST_POST_CREATED,
+                describtion: `A new Request Post with id=${newRequestPost.id} created`,
+            });
+        }
+
+        return newRequestPost;
     }
 
     @Get()
@@ -136,7 +150,7 @@ export class RequestpostController {
         owner?: Owner,
         @Query('mobile', new OptionalBooleanPipe()) mobile: boolean = undefined,
         @Query('closed', new OptionalBooleanPipe()) closed: boolean = undefined,
-    ) {
+    ): Promise<FindPagination<RequestPost>> {
         return this.requestPostService.find(
             page,
             limit,
@@ -155,7 +169,7 @@ export class RequestpostController {
     async findById(
         @Param('id', ParseUUIDPipe) id: string,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<RequestPost> {
         const requestPost = await this.requestPostService.findById(id);
         if (
             requestPost.access === DatasetAccess.PRIVATE &&
@@ -174,7 +188,7 @@ export class RequestpostController {
         @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateRequestPostDto,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<RequestPost> {
         const requestPost = await this.requestPostService.findById(id);
         if (requestPost && requestPost.user.id !== user.userId) {
             throw new HttpException(
@@ -182,6 +196,7 @@ export class RequestpostController {
                 HttpStatus.UNAUTHORIZED,
             );
         }
+        const currUser = requestPost.user;
 
         if (body.data_size) {
             if (body.payment_plan) {
@@ -209,17 +224,28 @@ export class RequestpostController {
             body.payment_plan,
         );
 
-        return this.requestPostService.update(id, {
+        const updatedRequestPost = await this.requestPostService.update(id, {
             ...body,
             payment_plan: paymentPlan,
         });
+
+        if (updatedRequestPost && currUser) {
+            await this.notificationService.create({
+                to: currUser,
+                from: null,
+                title: NotificationType.REQUEST_POST_UPDATED,
+                describtion: `Request post with id=${updatedRequestPost.id} successfully updated`,
+            });
+        }
+
+        return updatedRequestPost;
     }
 
     @Delete(':id')
     async remove(
         @Param('id', ParseUUIDPipe) id: string,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<RequestPost> {
         const requestPost = await this.requestPostService.findById(id);
         if (requestPost && requestPost.user.id !== user.userId) {
             throw new HttpException(
@@ -233,6 +259,16 @@ export class RequestpostController {
         if (deletedRequestPost) {
             deleteFolderRecursive(requestPostDataFolderPath);
         }
+        const currUser = deletedRequestPost.user;
+
+        if (deletedRequestPost && currUser) {
+            await this.notificationService.create({
+                to: currUser,
+                from: null,
+                title: NotificationType.REQUEST_POST_DELETED,
+                describtion: `Request post with id=${deletedRequestPost.id} successfully deleted`,
+            });
+        }
 
         return requestPost;
     }
@@ -241,7 +277,7 @@ export class RequestpostController {
     async closeRequestPost(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<RequestPost> {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
@@ -257,14 +293,27 @@ export class RequestpostController {
                 HttpStatus.UNAUTHORIZED,
             );
 
-        return this.requestPostService.close(requestPostId);
+        const currUser = requestPost.user;
+        const closedRequestPost = await this.requestPostService.close(
+            requestPostId,
+        );
+
+        if (closedRequestPost && currUser) {
+            await this.notificationService.create({
+                to: currUser,
+                from: null,
+                title: NotificationType.REQUEST_POST_CLOSED,
+                describtion: `Request post with id=${closedRequestPost.id} closed successfully`,
+            });
+        }
+        return closedRequestPost;
     }
 
     @Get(':id/makePrivate')
     async makePrivate(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<RequestPost> {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
@@ -279,14 +328,28 @@ export class RequestpostController {
                 HttpStatus.UNAUTHORIZED,
             );
 
-        return this.requestPostService.makePrivate(requestPostId);
+        const currUser = requestPost.user;
+        const privateRequestPost = await this.requestPostService.makePrivate(
+            requestPostId,
+        );
+
+        if (privateRequestPost && currUser) {
+            await this.notificationService.create({
+                to: currUser,
+                from: null,
+                title: NotificationType.REQUEST_POST_PRIVATE,
+                describtion: `Request post with id=${privateRequestPost.id} successfully made private`,
+            });
+        }
+
+        return privateRequestPost;
     }
 
     @Get(':id/makePublic')
     async makePublic(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<RequestPost> {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
@@ -301,29 +364,88 @@ export class RequestpostController {
                 HttpStatus.UNAUTHORIZED,
             );
 
-        return this.requestPostService.makePublic(requestPostId);
+        const currUser = requestPost.user;
+        const publicRequestPost = await this.requestPostService.makePublic(
+            requestPostId,
+        );
+
+        if (publicRequestPost && currUser) {
+            await this.notificationService.create({
+                to: currUser,
+                from: null,
+                title: NotificationType.REQUEST_POST_PUBLIC,
+                describtion: `Request post with id=${publicRequestPost.id} successfully made public`,
+            });
+        }
+        return publicRequestPost;
     }
 
     @Get(':id/upvote')
     async upvote(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @User() user: AuthorizedUserData,
-    ) {
-        const userEntity: userEntity = await this.userService.findById(
+    ): Promise<RequestPost> {
+        const currUser: userEntity = await this.userService.findById(
             user.userId,
         );
-        return this.requestPostService.upvote(requestPostId, userEntity);
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request Post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        const toUser = requestPost.user;
+        const upvotedPostRequest = await this.requestPostService.upvote(
+            requestPostId,
+            currUser,
+        );
+
+        if (upvotedPostRequest && toUser && currUser) {
+            await this.notificationService.create({
+                to: toUser,
+                from: currUser,
+                title: NotificationType.REQUEST_POST_UPVOTED,
+                describtion: `User with id=${currUser.id} upvoted your request post with id=${upvotedPostRequest.id}`,
+            });
+        }
+        return upvotedPostRequest;
     }
 
     @Get(':id/downvote')
     async downvote(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @User() user: AuthorizedUserData,
-    ) {
-        const userEntity: userEntity = await this.userService.findById(
+    ): Promise<RequestPost> {
+        const currUser: userEntity = await this.userService.findById(
             user.userId,
         );
-        return this.requestPostService.downvote(requestPostId, userEntity);
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request Post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        const toUser = requestPost.user;
+        const downvotedRequestPost = await this.requestPostService.downvote(
+            requestPostId,
+            currUser,
+        );
+
+        if (downvotedRequestPost && toUser && currUser) {
+            await this.notificationService.create({
+                to: toUser,
+                from: currUser,
+                title: NotificationType.REQUEST_POST_DOWNVOTED,
+                describtion: `User with id=${currUser.id} downvoted your request post with id=${downvotedRequestPost.id}`,
+            });
+        }
+        return downvotedRequestPost;
     }
 
     @Public()
@@ -341,7 +463,10 @@ export class RequestpostController {
             ),
         )
         status?: FilterContributionByStatus,
-    ) {
+    ): Promise<{
+        used: number;
+        total: number;
+    }> {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
@@ -368,7 +493,7 @@ export class RequestpostController {
             ),
         )
         status?: FilterContributionByStatus,
-    ) {
+    ): Promise<number> {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
@@ -391,7 +516,7 @@ export class RequestpostController {
         @Body() body: any,
         @Param('id') requestPostId: string,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<Contribution> {
         if (!file) {
             throw new HttpException(
                 'Error uploading file',
@@ -436,13 +561,13 @@ export class RequestpostController {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
-        // if (!currUser.bank_information){
-        //     if (existsSync(file.path)) unlinkSync(file.path);
-        //     throw new HttpException(
-        //         'Bank information not set',
-        //         HttpStatus.BAD_REQUEST,
-        //     );
-        // }
+        if (!currUser.bank_information && requestPost.payment !== 0) {
+            if (existsSync(file.path)) unlinkSync(file.path);
+            throw new HttpException(
+                'Cannot contribute to a paid request post Bank information not set',
+                HttpStatus.BAD_REQUEST,
+            );
+        }
 
         // validate the data type and uploaded file's size
         const bodyInstance = plainToInstance(CreateContributionDto, body);
@@ -479,17 +604,6 @@ export class RequestpostController {
             );
         }
 
-        // send warning notification if it's above 80%
-        const percentageUsed: number = (used / total) * 100;
-
-        if (percentageUsed > 95) {
-            // await this.notificationService.create({
-            //     title: NotificationType.SPACE_USAGE_WARNING,
-            //     from_user: user.userId,
-            //     user: requestPost.user.id,
-            // });
-        }
-
         const [datatype, extension] = mimetype.split('/');
 
         if (
@@ -504,7 +618,7 @@ export class RequestpostController {
         }
 
         // create the data and contribution
-        let data = null;
+        let data: Data = null;
 
         try {
             data = await this.dataService.create({
@@ -534,13 +648,14 @@ export class RequestpostController {
         let contribution = null;
         try {
             contribution = this.contributionService.create({
-                data: data.id,
+                data,
                 earning: 0,
                 request_post: requestPost,
                 status: ContributionStatus.PENDING,
                 user: currUser,
             });
         } catch (error) {
+            await this.dataService.remove(data.id);
             if (existsSync(file.path)) unlinkSync(file.path);
             throw new HttpException(
                 "Couldn't save Contribution: " + error?.message,
@@ -549,6 +664,7 @@ export class RequestpostController {
         }
 
         if (!contribution) {
+            await this.dataService.remove(data.id);
             if (existsSync(file.path)) unlinkSync(file.path);
             throw new HttpException(
                 "Couldn't save Contribution",
@@ -556,11 +672,33 @@ export class RequestpostController {
             );
         }
 
-        // await this.notificationService.create({
-        //     title: NotificationType.CONTRIBUTION_MADE,
-        //     from_user: user.userId,
-        //     user: requestPost.user.id,
-        // });
+        // send warning notification if it's above 80%
+        const percentageUsed: number = (used / total) * 100;
+
+        if (percentageUsed > 95) {
+            await this.notificationService.create({
+                title: NotificationType.REQUEST_POST_SPACE_WARNING,
+                to: currUser,
+                from: null,
+                describtion: `Request post with id=${requestPost.id} has over 95% disk usage`,
+            });
+        }
+
+        if (contribution) {
+            await this.notificationService.create({
+                title: NotificationType.REQUEST_POST_CONTRIBUTION_MADE,
+                to: requestPost.user,
+                from: currUser,
+                describtion: `User with id=${currUser.id} contributed to your request post with id=${requestPost.user.id}`,
+            });
+
+            await this.notificationService.create({
+                title: NotificationType.CONTRIBUTION_CREATED,
+                to: currUser,
+                from: null,
+                describtion: `Contribution with id=${contribution.id} successfully created`,
+            });
+        }
 
         return contribution;
     }
@@ -570,7 +708,7 @@ export class RequestpostController {
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @Query('page', ParseIntPipe) page?: number,
         @Query('limit') limit?: number,
-    ) {
+    ): Promise<FindPagination<Contribution>> {
         return this.contributionService.find(requestPostId, page, limit);
     }
 
@@ -578,7 +716,7 @@ export class RequestpostController {
     async findContribution(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @Param('contributionId', ParseUUIDPipe) contributionId: string,
-    ) {
+    ): Promise<Contribution> {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
@@ -595,7 +733,7 @@ export class RequestpostController {
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @Param('contributionId', ParseUUIDPipe) contributionId: string,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<Contribution> {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
@@ -625,15 +763,24 @@ export class RequestpostController {
                 HttpStatus.BAD_REQUEST,
             );
 
-        // await this.notificationService.create({
-        //     title: NotificationType.CONTRIBUTION_ACCEPTED,
-        //     from_user: user.userId,
-        //     user: contribution.user.id,
-        // });
+        const currUser = await this.userService.findById(user.userId);
+        const acceptedContribution = await this.contributionService.update(
+            contribution.id,
+            {
+                status: ContributionStatus.ACCEPTED,
+            },
+        );
 
-        return this.contributionService.update(contribution.id, {
-            status: ContributionStatus.ACCEPTED,
-        });
+        if (currUser && acceptedContribution) {
+            await this.notificationService.create({
+                title: NotificationType.CONTRIBUTION_ACCEPTED,
+                to: contribution.user,
+                from: currUser,
+                describtion: `Your contribution with id=${contribution.id} made to request post with id=${requestPost.id} is accepted`,
+            });
+        }
+
+        return acceptedContribution;
     }
 
     @Put(':id/contribution/:contributionId/reject')
@@ -641,7 +788,7 @@ export class RequestpostController {
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @Param('contributionId', ParseUUIDPipe) contributionId: string,
         @User() user: AuthorizedUserData,
-    ) {
+    ): Promise<Contribution> {
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
@@ -671,15 +818,23 @@ export class RequestpostController {
                 HttpStatus.BAD_REQUEST,
             );
 
-        // await this.notificationService.create({
-        //     title: NotificationType.CONTRIBUTION_REJECTED,
-        //     from_user: user.userId,
-        //     user: contribution.user,
-        // });
+        const currUser = await this.userService.findById(user.userId);
+        const rejectedRequestPost = await this.contributionService.update(
+            contribution.id,
+            {
+                status: ContributionStatus.REJECTED,
+            },
+        );
 
-        return this.contributionService.update(contribution.id, {
-            status: ContributionStatus.REJECTED,
-        });
+        if (rejectedRequestPost && currUser) {
+            await this.notificationService.create({
+                title: NotificationType.CONTRIBUTION_REJECTED,
+                to: contribution.user,
+                from: currUser,
+                describtion: `Your contribution with id=${contribution.id} made to request post with id=${requestPost.id} is rejected`,
+            });
+        }
+        return rejectedRequestPost;
     }
 
     @Delete(':id/contribution/:contributionId')
@@ -717,11 +872,20 @@ export class RequestpostController {
 
         const data = await this.dataService.findById(contribution.data.id);
         const fileLocation = data.src;
-        const deletedContribution = this.contributionService.remove(
+        const deletedContribution = await this.contributionService.remove(
             contribution.id,
         );
         if (deletedContribution && existsSync(fileLocation))
             unlinkSync(fileLocation);
+
+        if (deletedContribution && contribution.user) {
+            await this.notificationService.create({
+                title: NotificationType.CONTRIBUTION_DELETED,
+                to: contribution.user,
+                from: null,
+                describtion: `Contribution with id=${deletedContribution.id} deleted successfully`,
+            });
+        }
         return deletedContribution;
     }
 }

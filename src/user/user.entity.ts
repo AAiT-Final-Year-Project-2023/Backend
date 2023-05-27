@@ -8,7 +8,6 @@ import {
     JoinColumn,
     OneToMany,
     ManyToMany,
-    JoinTable,
 } from 'typeorm';
 import { ArrayMaxSize } from 'class-validator';
 import { UserRole, UserStatus } from 'src/common/defaults';
@@ -24,7 +23,7 @@ export class User {
     id: string;
 
     @OneToOne(() => BankInformation, {
-        cascade: true,
+        cascade: ['remove'],
         nullable: true,
     })
     @JoinColumn()
@@ -86,10 +85,9 @@ export class User {
 
     @Column('varchar', { array: true, default: [] })
     @ArrayMaxSize(3)
-    // relationship ????
     recently_viewed: string[];
 
-    @OneToMany(() => Notification, (notification) => notification.user, {
+    @OneToMany(() => Notification, (notification) => notification.to, {
         cascade: true,
     })
     notifications: Notification[];
