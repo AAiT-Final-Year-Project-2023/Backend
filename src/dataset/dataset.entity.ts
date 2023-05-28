@@ -46,6 +46,12 @@ export class Dataset {
     @Column({ type: 'money' })
     price: number;
 
+    @ManyToMany(() => User, (user) => user.purchased_datasets)
+    @JoinTable({
+        name: 'user_dataset_owned'
+    })
+    purchased_by: User[]
+
     @ManyToMany(() => User, (user) => user.upvoted_datasets)
     @JoinTable({
         name: 'user_dataset_upvotes',
