@@ -14,6 +14,7 @@ import {
     HttpException,
     HttpStatus,
     Put,
+    Res,
 } from '@nestjs/common';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
 import { UpdateRequestPostDto } from './dtos/update_requestpost.dto';
@@ -48,6 +49,9 @@ import { Public } from 'src/decorators/IsPublicRoute.decorator';
 import { OptionalBooleanPipe } from 'src/pipes/OptionalBoolean.pipe';
 import { RequestPost } from './requestpost.entity';
 import { Data } from 'src/data/data.entity';
+import * as archiver from 'archiver';
+import * as fs from 'fs';
+import { Response } from 'express';
 
 @Controller('requestpost')
 export class RequestpostController {
@@ -190,6 +194,12 @@ export class RequestpostController {
         @User() user: AuthorizedUserData,
     ): Promise<RequestPost> {
         const requestPost = await this.requestPostService.findById(id);
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
         if (requestPost && requestPost.user.id !== user.userId) {
             throw new HttpException(
                 'User unauthorized',
@@ -223,6 +233,12 @@ export class RequestpostController {
         let paymentPlan = await this.paymentPlanService.findById(
             body.payment_plan,
         );
+
+        if (paymentPlan.disk_size <= requestPost.data_size)
+            throw new HttpException(
+                'Payment plan disk space too small for the max file size set for the request post',
+                HttpStatus.BAD_REQUEST,
+            );
 
         const updatedRequestPost = await this.requestPostService.update(id, {
             ...body,
@@ -508,6 +524,101 @@ export class RequestpostController {
         );
     }
 
+    @Get(':id/download')
+    async downloadRequestPost(
+        @User() user: AuthorizedUserData,
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @Res() res: Response,
+    ) {
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+
+        const contributions = await this.contributionService.find(
+            requestPost.id,
+        );
+
+        if (!contributions)
+            throw new HttpException(
+                'Error loading contributions',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        if (!requestPost.closed)
+            throw new HttpException(
+                "Cannot download a request post unless it's closed",
+                HttpStatus.BAD_REQUEST,
+            );
+
+        if (
+            requestPost.access !== DatasetAccess.PUBLIC &&
+            requestPost.user.id !== user.userId
+        )
+            throw new HttpException(
+                "Cannot download a request post unless it's public or you are the owner",
+                HttpStatus.BAD_REQUEST,
+            );
+
+        const requestPostName = `[${requestPost.title}] by user: [${requestPost?.user?.username}].zip`;
+
+        const path = `./uploads/request_posts/${requestPostId}`;
+        if (!fs.existsSync(path))
+            throw new HttpException(
+                `Request post data not found`,
+                HttpStatus.NOT_FOUND,
+            );
+
+        const archive = archiver.create('zip', { zlib: { level: 9 } });
+
+        archive.on('error', (err) => {
+            throw new HttpException(
+                'Error preparing download file.' + err.message,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        });
+
+        const labels = {};
+        contributions.results.forEach((contribution) => {
+            const label = contribution.data.label;
+            labels[contribution.id] = label;
+        });
+
+        res.attachment(`${requestPostName}`);
+
+        try {
+            const files = await fs.promises.readdir(path);
+
+            for (const file of files) {
+                const filePath = `${path}/${file}`;
+                archive.file(filePath, { name: file });
+            }
+
+            archive.append(JSON.stringify(labels, null, 4), {
+                name: 'labels.json',
+            });
+
+            archive.pipe(res);
+            res.on('finish', () => {
+                console.log(
+                    `Download of request post with id: ${requestPost.id} has finished.`,
+                );
+            });
+
+            archive.finalize();
+        } catch (err) {
+            throw new HttpException(
+                'Error downloading file: ' + err.message,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
     // Contribution
     @Post(':id/contribution/upload')
     @UseInterceptors(FileInterceptor('file'))
@@ -561,7 +672,10 @@ export class RequestpostController {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
-        if (!currUser.bank_information && requestPost.payment !== 0) {
+        if (
+            !currUser.bank_information &&
+            requestPost.payment.toString() !== '$0.00'
+        ) {
             if (existsSync(file.path)) unlinkSync(file.path);
             throw new HttpException(
                 'Cannot contribute to a paid request post Bank information not set',
@@ -598,6 +712,7 @@ export class RequestpostController {
         );
         // check if it's full
         if (size + used > total) {
+            if (existsSync(file.path)) unlinkSync(file.path);
             throw new HttpException(
                 `Contribution file too big, request post space is running out: ${used} / ${total} bytes`,
                 HttpStatus.PAYLOAD_TOO_LARGE,
@@ -684,21 +799,19 @@ export class RequestpostController {
             });
         }
 
-        if (contribution) {
-            await this.notificationService.create({
-                title: NotificationType.REQUEST_POST_CONTRIBUTION_MADE,
-                to: requestPost.user,
-                from: currUser,
-                describtion: `User with id=${currUser.id} contributed to your request post with id=${requestPost.user.id}`,
-            });
+        await this.notificationService.create({
+            title: NotificationType.REQUEST_POST_CONTRIBUTION_MADE,
+            to: requestPost.user,
+            from: currUser,
+            describtion: `User with id=${currUser.id} contributed to your request post with id=${requestPost.user.id}`,
+        });
 
-            await this.notificationService.create({
-                title: NotificationType.CONTRIBUTION_CREATED,
-                to: currUser,
-                from: null,
-                describtion: `Contribution with id=${contribution.id} successfully created`,
-            });
-        }
+        await this.notificationService.create({
+            title: NotificationType.CONTRIBUTION_CREATED,
+            to: currUser,
+            from: null,
+            describtion: `Contribution with id=${contribution.id} successfully created`,
+        });
 
         return contribution;
     }

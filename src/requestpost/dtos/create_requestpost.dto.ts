@@ -11,6 +11,7 @@ import {
     IsUUID,
     Length,
     MaxLength,
+    Min,
     MinLength,
 } from 'class-validator';
 import { DataType } from 'src/common/defaults';
@@ -64,7 +65,7 @@ export class CreateRequestPostDto {
     // In birr
     @IsNotEmpty()
     @IsNumber()
-    @IsPositive()
+    @Min(0)
     payment: number;
 
     @IsNotEmpty()

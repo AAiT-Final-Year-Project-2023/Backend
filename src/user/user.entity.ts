@@ -102,7 +102,7 @@ export class User {
     request_posts: RequestPost[];
 
     @ManyToMany(() => Dataset, (dataset) => dataset.purchased_by)
-    purchased_datasets: Dataset[]
+    purchased_datasets: Dataset[];
 
     @ManyToMany(() => Dataset, (dataset) => dataset.upvoted_by)
     upvoted_datasets: Dataset[];

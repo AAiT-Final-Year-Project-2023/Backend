@@ -48,9 +48,9 @@ export class Dataset {
 
     @ManyToMany(() => User, (user) => user.purchased_datasets)
     @JoinTable({
-        name: 'user_dataset_owned'
+        name: 'user_dataset_owned',
     })
-    purchased_by: User[]
+    purchased_by: User[];
 
     @ManyToMany(() => User, (user) => user.upvoted_datasets)
     @JoinTable({

@@ -42,6 +42,7 @@ export class ContributionService {
                 'data.id',
                 'data.type',
                 'data.size',
+                'data.label',
                 'data.extension',
             ]);
 
