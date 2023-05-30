@@ -3,7 +3,6 @@ import {
     Post,
     Body,
     Get,
-    Patch,
     Param,
     Delete,
     Query,
@@ -13,7 +12,7 @@ import {
     UploadedFile,
     HttpException,
     HttpStatus,
-    Put,
+    Patch,
     Res,
 } from '@nestjs/common';
 import { CreateRequestPostDto } from './dtos/create_requestpost.dto';
@@ -42,7 +41,11 @@ import { Contribution } from 'src/contribution/contribution.entity';
 import { NotificationService } from 'src/notification/notification.service';
 import { StringLengthValidationPipe } from 'src/pipes/StringLengthValidation.pipe';
 import { EnumValidationPipe } from 'src/pipes/EnumValidation.pipe';
-import { deleteFolderRecursive, enumToString } from 'src/common/functions';
+import {
+    deleteFile,
+    deleteFolderRecursive,
+    enumToString,
+} from 'src/common/functions';
 import { UserService } from 'src/user/user.service';
 import { User as userEntity } from 'src/user/user.entity';
 import { Public } from 'src/decorators/IsPublicRoute.decorator';
@@ -210,7 +213,7 @@ export class RequestpostController {
 
         if (body.data_size) {
             if (body.payment_plan) {
-                let paymentPlan = await this.paymentPlanService.findById(
+                const paymentPlan = await this.paymentPlanService.findById(
                     body.payment_plan,
                 );
                 if (body.data_size >= paymentPlan.disk_size)
@@ -219,7 +222,7 @@ export class RequestpostController {
                         HttpStatus.BAD_REQUEST,
                     );
             } else {
-                let paymentPlan = await this.paymentPlanService.findById(
+                const paymentPlan = await this.paymentPlanService.findById(
                     requestPost.payment_plan.id,
                 );
                 if (body.data_size >= paymentPlan.disk_size)
@@ -230,7 +233,7 @@ export class RequestpostController {
             }
         }
 
-        let paymentPlan = await this.paymentPlanService.findById(
+        const paymentPlan = await this.paymentPlanService.findById(
             body.payment_plan,
         );
 
@@ -534,6 +537,12 @@ export class RequestpostController {
             requestPostId,
         );
 
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
         const contributions = await this.contributionService.find(
             requestPost.id,
         );
@@ -542,12 +551,6 @@ export class RequestpostController {
             throw new HttpException(
                 'Error loading contributions',
                 HttpStatus.INTERNAL_SERVER_ERROR,
-            );
-
-        if (!requestPost)
-            throw new HttpException(
-                'Request post not found',
-                HttpStatus.NOT_FOUND,
             );
 
         if (!requestPost.closed)
@@ -634,13 +637,12 @@ export class RequestpostController {
                 HttpStatus.BAD_REQUEST,
             );
         }
-
         // you can't contribute to own request post
         const requestPost = await this.requestPostService.findById(
             requestPostId,
         );
         if (user.userId === requestPost.user.id) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 'Cannot contribute to this Request Post',
                 HttpStatus.BAD_REQUEST,
@@ -649,7 +651,7 @@ export class RequestpostController {
 
         // cannot contribute to a closed request post
         if (requestPost.closed) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 'Cannot contribute to a closed Request Post',
                 HttpStatus.BAD_REQUEST,
@@ -658,7 +660,7 @@ export class RequestpostController {
 
         // cannot contribute to a private request post
         if (requestPost.access === DatasetAccess.PRIVATE) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 'Cannot contribute to a private Request Post',
                 HttpStatus.BAD_REQUEST,
@@ -668,7 +670,7 @@ export class RequestpostController {
         // cannot contribute if a user hasn't setup their bank information
         const currUser = await this.userService.findById(user.userId);
         if (!currUser) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
@@ -676,7 +678,7 @@ export class RequestpostController {
             !currUser.bank_information &&
             requestPost.payment.toString() !== '$0.00'
         ) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 'Cannot contribute to a paid request post Bank information not set',
                 HttpStatus.BAD_REQUEST,
@@ -689,8 +691,8 @@ export class RequestpostController {
 
         if (errors.length > 0) {
             const constraints = errors[0].constraints;
-            const message = constraints[Object.keys(constraints)[0]]; // get the first error message
-            if (existsSync(file.path)) unlinkSync(file.path);
+            const message = constraints[Object.keys(constraints)[0]];
+            deleteFile(file.path);
             throw new HttpException(message, HttpStatus.BAD_REQUEST);
         }
 
@@ -698,7 +700,7 @@ export class RequestpostController {
         const { size, mimetype } = file;
 
         if (requestPost.data_size < size) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 `Contribution file too big, maximum allowed for this request post: ${requestPost.data_size} bytes`,
                 HttpStatus.PAYLOAD_TOO_LARGE,
@@ -712,7 +714,7 @@ export class RequestpostController {
         );
         // check if it's full
         if (size + used > total) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 `Contribution file too big, request post space is running out: ${used} / ${total} bytes`,
                 HttpStatus.PAYLOAD_TOO_LARGE,
@@ -725,7 +727,7 @@ export class RequestpostController {
             datatype !== requestPost.datatype ||
             !requestPost.extensions.includes(extension)
         ) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 'Unsupported datatype for the current Request Post',
                 HttpStatus.BAD_REQUEST,
@@ -745,7 +747,7 @@ export class RequestpostController {
                 extension: mimetype,
             });
         } catch (error) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 "Couldn't save Data: " + error?.message,
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -753,7 +755,7 @@ export class RequestpostController {
         }
 
         if (!data) {
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 "Couldn't save Data",
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -771,7 +773,7 @@ export class RequestpostController {
             });
         } catch (error) {
             await this.dataService.remove(data.id);
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 "Couldn't save Contribution: " + error?.message,
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -780,7 +782,7 @@ export class RequestpostController {
 
         if (!contribution) {
             await this.dataService.remove(data.id);
-            if (existsSync(file.path)) unlinkSync(file.path);
+            deleteFile(file.path);
             throw new HttpException(
                 "Couldn't save Contribution",
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -841,7 +843,7 @@ export class RequestpostController {
         return this.contributionService.findById(contributionId);
     }
 
-    @Put(':id/contribution/:contributionId/accept')
+    @Patch(':id/contribution/:contributionId/accept')
     async acceptContribution(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @Param('contributionId', ParseUUIDPipe) contributionId: string,
@@ -896,7 +898,7 @@ export class RequestpostController {
         return acceptedContribution;
     }
 
-    @Put(':id/contribution/:contributionId/reject')
+    @Patch(':id/contribution/:contributionId/reject')
     async rejectContribution(
         @Param('id', ParseUUIDPipe) requestPostId: string,
         @Param('contributionId', ParseUUIDPipe) contributionId: string,

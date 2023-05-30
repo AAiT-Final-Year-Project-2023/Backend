@@ -17,12 +17,12 @@ export class IsSupportedFileExtensionConstraint
     async validate(extensions: string[], args: ValidationArguments) {
         const supportedExtensionsTypes: FileExtension[] =
             await this.fileExtensionService.find();
-        let supportedFileExtensions: string[] = [];
+        const supportedFileExtensions: string[] = [];
         supportedExtensionsTypes.forEach((supportedExtensionType) =>
             supportedFileExtensions.push(supportedExtensionType.extension),
         );
 
-        for (let extension of extensions) {
+        for (const extension of extensions) {
             if (!supportedFileExtensions.includes(extension)) return false;
         }
 

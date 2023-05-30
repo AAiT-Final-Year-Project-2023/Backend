@@ -42,7 +42,7 @@ export class BankinformationService {
     }
 
     async remove(user: User): Promise<BankInformation> {
-        const bankInformation = user.bank_information; 
+        const bankInformation = user.bank_information;
         if (!bankInformation)
             throw new HttpException(
                 'Bank information not found',

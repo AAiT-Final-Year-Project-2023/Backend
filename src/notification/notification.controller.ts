@@ -5,7 +5,7 @@ import {
     HttpStatus,
     Param,
     ParseUUIDPipe,
-    Put,
+    Patch,
 } from '@nestjs/common';
 import { AuthorizedUserData } from 'src/common/interfaces';
 import { User } from 'src/decorators/CurrentUser.decorator';
@@ -15,7 +15,7 @@ import { NotificationService } from './notification.service';
 export class NotificationController {
     constructor(private notificationService: NotificationService) {}
 
-    @Put('read/:id')
+    @Patch('read/:id')
     async read(
         @Param('id', ParseUUIDPipe) id: string,
         @User() user: AuthorizedUserData,

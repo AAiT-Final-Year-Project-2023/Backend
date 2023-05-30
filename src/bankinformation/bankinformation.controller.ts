@@ -114,8 +114,6 @@ export class BankinformationController {
                 HttpStatus.NOT_FOUND,
             );
 
-        return await this.bankInformationService.remove(
-            currUser
-        );
+        return await this.bankInformationService.remove(currUser);
     }
 }

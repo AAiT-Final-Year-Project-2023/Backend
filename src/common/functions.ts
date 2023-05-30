@@ -46,3 +46,7 @@ export function deleteFolderRecursive(folderPath) {
         rmdirSync(folderPath);
     }
 }
+
+export function deleteFile(filePath: string) {
+    if (existsSync(filePath)) unlinkSync(filePath);
+}

@@ -4,15 +4,13 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     PrimaryGeneratedColumn,
-    OneToOne,
-    JoinColumn,
     ManyToMany,
     ManyToOne,
     JoinTable,
 } from 'typeorm';
-import { DataType } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
 import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
+import { DataType, DatasetStatus } from 'src/common/defaults';
 
 @Entity()
 export class Dataset {
@@ -22,7 +20,7 @@ export class Dataset {
     @ManyToOne(() => User, (user) => user.datasets)
     user: User;
 
-    @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.request_posts)
+    @ManyToOne(() => PaymentPlan, (payment_plan) => payment_plan.datasets)
     payment_plan: PaymentPlan;
 
     @Column()
@@ -31,17 +29,27 @@ export class Dataset {
     @Column()
     description: string;
 
+    @Column()
+    src: string;
+
+    @Column()
+    size: number;
+
     @Column('varchar', { array: true })
     labels: string[];
 
     @Column({
         type: 'enum',
+        enum: DatasetStatus,
+        default: DatasetStatus.PENDING,
+    })
+    status: DatasetStatus;
+
+    @Column({
+        type: 'enum',
         enum: DataType,
     })
-    datatype: string;
-
-    @Column()
-    dataset_size: number;
+    datatype: DataType;
 
     @Column({ type: 'money' })
     price: number;

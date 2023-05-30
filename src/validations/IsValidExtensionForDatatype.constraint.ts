@@ -20,14 +20,14 @@ export class IsValidExtensionForDatatypeConstraint
 
         const supportedExtensionsTypes: FileExtension[] =
             await this.fileExtensionService.find();
-        let validExtensionsForType: string[] = [];
+        const validExtensionsForType: string[] = [];
         supportedExtensionsTypes.forEach((supportedExtensionType) => {
             if (object.datatype === supportedExtensionType.data_type) {
                 validExtensionsForType.push(supportedExtensionType.extension);
             }
         });
 
-        for (let extension of extensions) {
+        for (const extension of extensions) {
             if (!validExtensionsForType.includes(extension)) return false;
         }
 

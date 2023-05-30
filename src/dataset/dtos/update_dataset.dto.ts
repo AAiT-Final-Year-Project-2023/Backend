@@ -2,13 +2,12 @@ import {
     ArrayMaxSize,
     IsArray,
     IsEnum,
-    IsInt,
     IsNotEmpty,
+    IsNumber,
     IsOptional,
-    IsPositive,
     IsString,
-    Max,
     MaxLength,
+    Min,
 } from 'class-validator';
 import { DataType } from 'src/common/defaults';
 
@@ -16,15 +15,13 @@ export class UpdateDatasetDto {
     @IsOptional()
     @IsString()
     @IsNotEmpty()
-    @IsString()
-    @Max(25)
+    @MaxLength(25)
     title: string;
 
     @IsOptional()
     @IsString()
     @IsNotEmpty()
-    @IsString()
-    @Max(500)
+    @MaxLength(500)
     description: string;
 
     @IsOptional()
@@ -40,13 +37,7 @@ export class UpdateDatasetDto {
 
     @IsOptional()
     @IsNotEmpty()
-    @IsInt()
-    @IsPositive()
-    dataset_size: number;
-
-    @IsOptional()
-    @IsNotEmpty()
-    @IsInt()
-    @IsPositive()
+    @IsNumber()
+    @Min(0)
     price: number;
 }

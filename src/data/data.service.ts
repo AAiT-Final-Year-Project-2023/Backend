@@ -9,7 +9,7 @@ export class DataService {
     constructor(@InjectRepository(Data) private repo: Repository<Data>) {}
 
     async create(data: Partial<Data>) {
-        let newData = this.repo.create(data);
+        const newData = this.repo.create(data);
         return this.repo.save(newData);
     }
 

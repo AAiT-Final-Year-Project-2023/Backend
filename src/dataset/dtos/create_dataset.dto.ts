@@ -2,26 +2,30 @@ import {
     ArrayMaxSize,
     IsArray,
     IsEnum,
-    IsInt,
     IsNotEmpty,
+    IsNumber,
     IsPositive,
     IsString,
-    Max,
+    IsUUID,
     MaxLength,
 } from 'class-validator';
 import { DataType } from 'src/common/defaults';
+import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator';
 
 export class CreateDatasetDto {
-    @IsString()
+    @IsNotEmpty()
+    @IsUUID()
+    @IsValidPaymentPlan()
+    payment_plan: string;
+
     @IsNotEmpty()
     @IsString()
-    @Max(25)
+    @MaxLength(25)
     title: string;
 
-    @IsString()
     @IsNotEmpty()
     @IsString()
-    @Max(500)
+    @MaxLength(500)
     description: string;
 
     @IsArray()
@@ -34,12 +38,7 @@ export class CreateDatasetDto {
     datatype: DataType;
 
     @IsNotEmpty()
-    @IsInt()
-    @IsPositive()
-    dataset_size: number;
-
-    @IsNotEmpty()
-    @IsInt()
+    @IsNumber()
     @IsPositive()
     price: number;
 }

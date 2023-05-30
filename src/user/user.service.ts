@@ -42,11 +42,10 @@ export class UserService {
     }
 
     async findAdmins(): Promise<User[]> {
-        return this.repo.find({
-            where: {
-                roles: UserRole.ADMIN,
-            },
-        });
+        return this.repo
+            .createQueryBuilder('user')
+            .where(`'${UserRole.ADMIN}' = ANY (user.roles)`)
+            .getMany();
     }
 
     async update(

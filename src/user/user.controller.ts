@@ -6,8 +6,8 @@ import {
     HttpStatus,
     Param,
     ParseUUIDPipe,
+    Patch,
     Post,
-    Put,
     UploadedFile,
     UseInterceptors,
 } from '@nestjs/common';
@@ -31,9 +31,9 @@ export class UserController {
     ) {}
 
     @Roles(UserRole.ADMIN)
-    @Put('make-admin/:id')
+    @Patch('make-admin/:id')
     async makeUserAdmin(@Param('id', ParseUUIDPipe) userId: string) {
-        let user = await this.userService.findById(userId);
+        const user = await this.userService.findById(userId);
         if (!user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
@@ -44,13 +44,13 @@ export class UserController {
             return 'User already is an Admin';
         }
         roles.push(UserRole.ADMIN);
-        let updatedUser = await this.userService.update(userId, {
+        const updatedUser = await this.userService.update(userId, {
             roles: roles,
         });
         return 'User given Admin privilege';
     }
 
-    @Put('edit_profile')
+    @Patch('edit_profile')
     async editProfile(
         @Body() body: UpdateUserDto,
         @User() user: AuthorizedUserData,

@@ -31,7 +31,8 @@ export class AppController {
     ) {}
 
     @Get('curr-user')
-    currUser(@User() user) {
+    async currUser(@User() user: AuthorizedUserData) {
+        const currUser = await this.userService.findById(user.userId);
         return user;
     }
 

@@ -16,6 +16,12 @@ export enum ContributionStatus {
     DELETED_REQUEST_POST = 'deleted request post',
 }
 
+export enum DatasetStatus {
+    PENDING = 'pending',
+    ACCEPTED = 'accepted',
+    REJECTED = 'rejected',
+}
+
 export enum DataType {
     IMAGE = 'image',
     AUDIO = 'audio',
@@ -61,6 +67,8 @@ export enum NotificationType {
     DATASET_DOWNVOTED = 'Your dataset got downvoted',
     DATASET_PURCHASED = 'Your dataset got purchased',
     DATASET_PURCHASED_SUCCESS = 'Dataset successfully purchased',
+
+    DATASET_PENDING_APPROVAL = 'New Dataset created and pending approval',
 }
 export enum DataTypeFilter {
     IMAGE = 'image',

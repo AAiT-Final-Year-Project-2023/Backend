@@ -9,7 +9,6 @@ import { diskStorage } from 'multer';
 import { AuthorizedUserData } from 'src/common/interfaces';
 import { existsSync, mkdirSync } from 'fs';
 import { ContributionModule } from 'src/contribution/contribution.module';
-import { ContributionUploadMiddleware } from 'src/middlewares/ContributionUploadMiddleware.middleware';
 import { PaymentplanModule } from 'src/paymentplan/paymentplan.module';
 import { User } from 'src/user/user.entity';
 import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
@@ -54,7 +53,7 @@ import { UserModule } from 'src/user/user.module';
         UserModule,
     ],
     controllers: [RequestpostController],
-    providers: [RequestpostService, ContributionUploadMiddleware],
+    providers: [RequestpostService],
     exports: [RequestpostService],
 })
 export class RequestpostModule {}

@@ -11,7 +11,6 @@ import {
     ContributionStatus,
 } from 'src/common/defaults';
 import { User } from 'src/user/user.entity';
-import { Data } from 'src/data/data.entity';
 import { Contribution } from 'src/contribution/contribution.entity';
 
 @Injectable()
@@ -261,7 +260,7 @@ export class RequestpostService {
         });
     }
 
-    async upvote(id: string, user: User) {
+    async upvote(id: string, user: User): Promise<RequestPost> {
         const metadata = this.repo.metadata;
         let requestPostColumns = metadata.nonVirtualColumns.map(
             (column) => column.propertyName,
@@ -269,7 +268,7 @@ export class RequestpostService {
         requestPostColumns = requestPostColumns.map(
             (column) => `request_post.${column}`,
         );
-        let requestPost = await this.repo
+        const requestPost = await this.repo
             .createQueryBuilder('request_post')
             .leftJoinAndSelect('request_post.user', 'user')
             .leftJoinAndSelect('request_post.upvoted_by', 'upvoted_user')
@@ -301,21 +300,17 @@ export class RequestpostService {
                 HttpStatus.BAD_REQUEST,
             );
 
-        // check if already upvoted
         const arr = requestPost.upvoted_by.filter(
             (upvoted_user) => user.id === upvoted_user.id,
         );
         const alreadyUpvoted: boolean = arr.length > 0;
 
-        // clear the user from the upvoted_by list
         requestPost.upvoted_by = requestPost.upvoted_by.filter(
             (upvoted_user) => user.id !== upvoted_user.id,
         );
 
-        // if the user hasn't liked the request_post add them to the list
         if (!alreadyUpvoted) requestPost.upvoted_by.push(user);
 
-        // if the user has disliked the request_post, remove them from the downvoted_by list
         requestPost.downvoted_by = requestPost.downvoted_by.filter(
             (downvoted_user) => user.id !== downvoted_user.id,
         );
@@ -336,7 +331,7 @@ export class RequestpostService {
             .getOne();
     }
 
-    async downvote(id: string, user: User) {
+    async downvote(id: string, user: User): Promise<RequestPost> {
         const metadata = this.repo.metadata;
         let requestPostColumns = metadata.nonVirtualColumns.map(
             (column) => column.propertyName,
@@ -344,7 +339,7 @@ export class RequestpostService {
         requestPostColumns = requestPostColumns.map(
             (column) => `request_post.${column}`,
         );
-        let requestPost = await this.repo
+        const requestPost = await this.repo
             .createQueryBuilder('request_post')
             .leftJoinAndSelect('request_post.user', 'user')
             .leftJoinAndSelect('request_post.upvoted_by', 'upvoted_user')
@@ -375,24 +370,21 @@ export class RequestpostService {
                 HttpStatus.BAD_REQUEST,
             );
 
-        // check if already downvoted
         const arr = requestPost.downvoted_by.filter(
             (downvoted_user) => user.id === downvoted_user.id,
         );
         const alreadyDownvoted: boolean = arr.length > 0;
 
-        // clear the user from the upvoted_by list
         requestPost.downvoted_by = requestPost.downvoted_by.filter(
             (downvoted_user) => user.id !== downvoted_user.id,
         );
 
-        // if the user hasn't disliked the request_post add them to the list
         if (!alreadyDownvoted) requestPost.downvoted_by.push(user);
 
-        // if the user has liked the request_post, remove them from the upvoted_by list
         requestPost.upvoted_by = requestPost.upvoted_by.filter(
             (upvoted_user) => user.id !== upvoted_user.id,
         );
+
         await this.repo.save(requestPost);
         return this.repo
             .createQueryBuilder('request_post')
@@ -439,7 +431,7 @@ export class RequestpostService {
         const result = await query.getRawOne();
         let used = undefined;
         if (result) {
-            let { sum } = result;
+            const { sum } = result;
             used = sum;
         }
 
