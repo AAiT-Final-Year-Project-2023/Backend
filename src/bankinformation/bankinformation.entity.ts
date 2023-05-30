@@ -18,7 +18,7 @@ export class BankInformation {
     account_number: string;
 
     @Column()
-    bank_code: string;
+    bank_id: string;
 
     @CreateDateColumn()
     created_at: Date;

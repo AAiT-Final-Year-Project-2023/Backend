@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Payment } from './payment.entity';
 import {
@@ -50,8 +50,15 @@ export class PaymentService {
     }
 
     async getBanks(): Promise<GetBanksResponse> {
-        const response = await this.chapaService.getBanks();
-        return response;
+        try {
+            const response = await this.chapaService.getBanks();
+            return response;
+        } catch (e) {
+            throw new HttpException(
+                'Could not get supported banks: ' + e?.message,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     findAll() {

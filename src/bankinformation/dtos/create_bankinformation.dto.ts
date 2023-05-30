@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsString } from 'class-validator';
+import { IsValidBankAccountNumber } from 'src/decorators/IsValidBankAccountNumber.decorator';
 import { IsValidBankId } from 'src/decorators/IsValidBankId.decorator';
 
 export class CreateBankinformationDto {
@@ -8,6 +9,7 @@ export class CreateBankinformationDto {
 
     @IsNotEmpty()
     @IsString()
+    @IsValidBankAccountNumber()
     account_number: string;
 
     @IsNotEmpty()

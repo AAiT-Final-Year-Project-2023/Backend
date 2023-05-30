@@ -44,6 +44,7 @@ import { PaymentModule } from './payment/payment.module';
 import { Payment } from './payment/payment.entity';
 import { IsFutureDateConstraint } from './validations/IsFutureDate.constraint';
 import { IsValidBankIdConstraint } from './validations/IsValidBankId.constraint';
+import { IsValidBankAccountNumberConstraint } from './validations/IsValidBankAccountNumber.constraint';
 
 @Module({
     imports: [
@@ -135,6 +136,7 @@ import { IsValidBankIdConstraint } from './validations/IsValidBankId.constraint'
         IsValidRequestPostDataSizeConstraint,
         IsFutureDateConstraint,
         IsValidBankIdConstraint,
+        IsValidBankAccountNumberConstraint,
         {
             provide: APP_GUARD,
             useClass: JwtAuthGuard,

@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BankInformation } from './bankinformation.entity';
 import { Repository } from 'typeorm';
 import { CreateBankinformationDto } from './dtos/create_bankinformation.dto';
+import { User } from 'src/user/user.entity';
+import { async } from 'rxjs';
 
 @Injectable()
 export class BankinformationService {
@@ -39,14 +41,19 @@ export class BankinformationService {
         return this.repo.save(bankInformation);
     }
 
-    async remove(id: string): Promise<BankInformation> {
-        const bankInformation = await this.findOne(id);
+    async remove(user: User): Promise<BankInformation> {
+        const bankInformation = user.bank_information; 
         if (!bankInformation)
             throw new HttpException(
                 'Bank information not found',
                 HttpStatus.NOT_FOUND,
             );
 
-        return this.repo.remove(bankInformation);
+        await this.repo.manager.transaction(async (manager) => {
+            user.bank_information = null;
+            await manager.save(user);
+            await manager.remove(bankInformation);
+        });
+        return bankInformation;
     }
 }

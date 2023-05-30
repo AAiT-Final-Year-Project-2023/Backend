@@ -33,34 +33,49 @@ export class BankinformationController {
     }
 
     @Post('/')
-    async setupBankInfo(
+    async create(
         @Body() body: CreateBankinformationDto,
         @User() user: AuthorizedUserData,
     ): Promise<BankInformation> {
         const currUser = await this.userService.findById(user.userId);
-        const newBankInformation = await this.bankInformationService.create(
-            body,
-        );
         if (!currUser)
             throw new HttpException(
                 'User not found',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+
+        const newBankInformation = await this.bankInformationService.create(
+            body,
+        );
         if (!newBankInformation)
             throw new HttpException(
                 'Error creating new bank information',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+
         const updatedUser = await this.userService.update(user.userId, {
             bank_information: newBankInformation,
         });
-
         if (!updatedUser)
             throw new HttpException(
                 'Error creating new bank information',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+
         return newBankInformation;
+    }
+
+    @Get('/')
+    async getBankInfo(
+        @User() user: AuthorizedUserData,
+    ): Promise<BankInformation> {
+        const currUser = await this.userService.findById(user.userId);
+        if (!currUser)
+            throw new HttpException(
+                'User not found',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        return currUser.bank_information;
     }
 
     @Patch()
@@ -76,7 +91,7 @@ export class BankinformationController {
             );
         if (!currUser.bank_information)
             throw new HttpException(
-                'Bank information not found',
+                'Bank information not set',
                 HttpStatus.NOT_FOUND,
             );
         return await this.bankInformationService.update(
@@ -95,12 +110,12 @@ export class BankinformationController {
             );
         if (!currUser.bank_information)
             throw new HttpException(
-                'Bank information not found',
+                'Bank information not set',
                 HttpStatus.NOT_FOUND,
             );
 
         return await this.bankInformationService.remove(
-            currUser.bank_information.id,
+            currUser
         );
     }
 }

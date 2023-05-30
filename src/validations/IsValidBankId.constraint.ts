@@ -20,10 +20,10 @@ export class IsValidBankIdConstraint implements ValidatorConstraintInterface {
                 'Could not get supported banks',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
-        supportedBanks.data.forEach((data) => {
-            if (bank_id === data.id) return true;
-        });
-        return false;
+        const isValid =
+            supportedBanks.data.filter((bank) => bank_id === bank.id).length >
+            0;
+        return isValid;
     }
 
     defaultMessage(args: ValidationArguments) {

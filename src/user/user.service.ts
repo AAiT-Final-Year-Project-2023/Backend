@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create_user.dto';
 import { User } from './user.entity';
+import { UserRole } from 'src/common/defaults';
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,7 @@ export class UserService {
             where: {
                 id,
             },
+            relations: ['bank_information'],
         });
     }
 
@@ -35,6 +37,14 @@ export class UserService {
         return this.repo.findOne({
             where: {
                 email,
+            },
+        });
+    }
+
+    async findAdmins(): Promise<User[]> {
+        return this.repo.find({
+            where: {
+                roles: UserRole.ADMIN,
             },
         });
     }
