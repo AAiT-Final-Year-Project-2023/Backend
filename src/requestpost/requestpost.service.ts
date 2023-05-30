@@ -140,17 +140,17 @@ export class RequestpostService {
                 );
 
         if (filter && filter !== DataTypeFilter.ALL)
-            query.where('request_post.datatype = :dataType', {
+            query.andWhere('request_post.datatype = :dataType', {
                 dataType: filter,
             });
 
-        if (userId) query.where('user.id = :userId', { userId });
+        if (userId) query.andWhere('user.id = :userId', { userId });
         else
-            query.where('request_post.access = :access', {
+            query.andWhere('request_post.access = :access', {
                 access: DatasetAccess.PUBLIC,
             });
 
-        if (closed) query.where('request_post.closed = :closed', { closed });
+        if (closed) query.andWhere('request_post.closed = :closed', { closed });
 
         if (sortByDate) query.addOrderBy('request_post.created_at', sortByDate);
         if (sortByUpvotes) query.addOrderBy('upvotes', sortByUpvotes);
