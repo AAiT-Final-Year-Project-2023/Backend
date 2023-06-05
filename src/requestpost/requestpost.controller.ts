@@ -55,6 +55,7 @@ import { Data } from 'src/data/data.entity';
 import * as archiver from 'archiver';
 import * as fs from 'fs';
 import { Response } from 'express';
+import { UpdateContributionDto } from 'src/contribution/dtos/update_contribution.dto';
 
 @Controller('requestpost')
 export class RequestpostController {
@@ -950,6 +951,65 @@ export class RequestpostController {
             });
         }
         return rejectedRequestPost;
+    }
+
+    @Patch(':id/contribution/:contributionId/update')
+    async updateContribution(
+        @Param('id', ParseUUIDPipe) requestPostId: string,
+        @Param('contributionId', ParseUUIDPipe) contributionId: string,
+        @User() user: AuthorizedUserData,
+        @Body() body: UpdateContributionDto,
+    ) {
+        const requestPost = await this.requestPostService.findById(
+            requestPostId,
+        );
+        if (!requestPost)
+            throw new HttpException(
+                'Request post not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        const contribution = await this.contributionService.findById(
+            contributionId,
+        );
+        if (!contribution || contribution.request_post.id !== requestPostId)
+            throw new HttpException(
+                'Contribution not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        if (
+            user.userId !== contribution.user.id ||
+            user.userId !== requestPost.user.id
+        )
+            throw new HttpException(
+                'Use not authorized',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        if (
+            contribution.status !== ContributionStatus.ACCEPTED &&
+            user.userId === requestPost.user.id
+        )
+            throw new HttpException(
+                'Cannot update an unaccepted contribution',
+                HttpStatus.BAD_REQUEST,
+            );
+
+        if (
+            contribution.status === ContributionStatus.ACCEPTED &&
+            user.userId === contribution.user.id
+        )
+            throw new HttpException(
+                'Cannot update an accepted contribution',
+                HttpStatus.BAD_REQUEST,
+            );
+
+        const data = await this.dataService.findById(contribution.data.id);
+        if (!data)
+            throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+
+        return await this.dataService.update(data.id, body);
     }
 
     @Delete(':id/contribution/:contributionId')
