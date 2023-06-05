@@ -34,7 +34,16 @@ export class UserController {
     @Get('/me')
     async me(@User() user: AuthorizedUserData) {
         const currUser = await this.userService.findById(user.userId);
-        const { password, ...rest } = currUser;
+        const {
+            password,
+            password_change_verification_code,
+            password_change_code_expiration,
+            email_verification_code,
+            email_verification_code_expiration,
+            new_password,
+            status,
+            ...rest
+        } = currUser;
         return rest;
     }
 
