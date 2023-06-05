@@ -2,6 +2,7 @@ import {
     Body,
     Controller,
     Delete,
+    Get,
     HttpException,
     HttpStatus,
     Param,
@@ -29,6 +30,13 @@ export class UserController {
         private userService: UserService,
         private configService: ConfigService,
     ) {}
+
+    @Get('/me')
+    async me(@User() user: AuthorizedUserData) {
+        const currUser = await this.userService.findById(user.userId);
+        const { password, ...rest } = currUser;
+        return rest;
+    }
 
     @Roles(UserRole.ADMIN)
     @Patch('make-admin/:id')

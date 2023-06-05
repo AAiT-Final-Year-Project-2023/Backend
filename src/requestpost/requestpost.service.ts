@@ -127,18 +127,6 @@ export class RequestpostService {
                 ].join(', '),
             );
 
-        if (search && search !== '')
-            query
-                .where('LOWER(request_post.title) LIKE LOWER(:searchString)', {
-                    searchString: `%${search.trim()}%`,
-                })
-                .orWhere(
-                    'LOWER(request_post.description) LIKE LOWER(:searchString)',
-                    {
-                        searchString: `%${search.trim()}%`,
-                    },
-                );
-
         if (filter && filter !== DataTypeFilter.ALL)
             query.andWhere('request_post.datatype = :dataType', {
                 dataType: filter,
@@ -157,10 +145,22 @@ export class RequestpostService {
         if (sortByDownvotes) query.addOrderBy('downvotes', sortByDownvotes);
 
         if (mobile)
-            query.where(
+            query.andWhere(
                 'COALESCE(array_length(request_post.labels, 1), 0) = 0',
             );
 
+        if (search && search !== '')
+            query
+                .where('LOWER(request_post.title) LIKE LOWER(:searchString)', {
+                    searchString: `%${search.trim()}%`,
+                })
+                .orWhere(
+                    'LOWER(request_post.description) LIKE LOWER(:searchString)',
+                    {
+                        searchString: `%${search.trim()}%`,
+                    },
+                );
+                
         const count = await query.getCount();
 
         if (limit) {
