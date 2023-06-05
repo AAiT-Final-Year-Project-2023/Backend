@@ -31,6 +31,7 @@ import {
     NotificationType,
     Owner,
     SortOrder,
+    UserRole,
 } from 'src/common/defaults';
 import { EnumValidationPipe } from 'src/pipes/EnumValidation.pipe';
 import { StringLengthValidationPipe } from 'src/pipes/StringLengthValidation.pipe';
@@ -41,6 +42,7 @@ import { validate } from 'class-validator';
 import { Response } from 'express';
 import * as fs from 'fs';
 import { Public } from 'src/decorators/IsPublicRoute.decorator';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('dataset')
 export class DatasetController {
@@ -256,7 +258,9 @@ export class DatasetController {
     }
 
     @Get(':id')
-    findById(@Param('id', ParseUUIDPipe) id: string) {
+    findById(
+        @Param('id', ParseUUIDPipe) id: string,
+    ): Promise<Partial<Dataset>> {
         return this.datasetService.findById(id);
     }
 
@@ -264,7 +268,7 @@ export class DatasetController {
     async upvote(
         @Param('id', ParseUUIDPipe) datasetId: string,
         @User() user: AuthorizedUserData,
-    ): Promise<Dataset | any> {
+    ): Promise<Partial<Dataset>> {
         const currUser: UserEntity = await this.userService.findById(
             user.userId,
         );
@@ -302,14 +306,15 @@ export class DatasetController {
             });
         }
 
-        return upvotedDataset;
+        const { src, ...rest } = upvotedDataset;
+        return rest;
     }
 
     @Get(':id/downvote')
     async downvote(
         @Param('id', ParseUUIDPipe) datasetId: string,
         @User() user: AuthorizedUserData,
-    ): Promise<Dataset> {
+    ): Promise<Partial<Dataset>> {
         const currUser: UserEntity = await this.userService.findById(
             user.userId,
         );
@@ -345,7 +350,8 @@ export class DatasetController {
                 describtion: `User with id=${currUser.id} downvoted your dataset with id=${downvotedDataset.id}`,
             });
         }
-        return downvotedDataset;
+        const { src, ...rest } = downvotedDataset;
+        return rest;
     }
 
     @Public()
@@ -373,7 +379,7 @@ export class DatasetController {
                     (ownerUser) => ownerUser.id === user.userId,
                 ).length > 0;
         }
-        if (!hasPurchased)
+        if (!hasPurchased && !user.role.includes(UserRole.ADMIN))
             throw new HttpException(
                 'Cannot download an unpurchased dataset',
                 HttpStatus.BAD_REQUEST,
@@ -398,13 +404,35 @@ export class DatasetController {
         fileStream.pipe(res);
     }
 
+    @Roles(UserRole.ADMIN)
+    @Patch(':id/accept')
+    async accept(@Param('id', ParseUUIDPipe) id: string) {
+        const dataset = await this.datasetService.findById(id);
+        if (!dataset)
+            throw new HttpException('Datset not found', HttpStatus.NOT_FOUND);
+        return this.datasetService.update(dataset, {
+            status: DatasetStatus.ACCEPTED,
+        });
+    }
+
+    @Roles(UserRole.ADMIN)
+    @Patch(':id/reject')
+    async reject(@Param('id', ParseUUIDPipe) id: string) {
+        const dataset = await this.datasetService.findById(id);
+        if (!dataset)
+            throw new HttpException('Datset not found', HttpStatus.NOT_FOUND);
+        return this.datasetService.update(dataset, {
+            status: DatasetStatus.REJECTED,
+        });
+    }
+
     @Patch(':id')
     async update(
         @Param('id', ParseUUIDPipe) id: string,
         @Body() body: UpdateDatasetDto,
         @User() user: AuthorizedUserData,
     ) {
-        const dataset = await this.findById(id);
+        const dataset = await this.datasetService.findById(id);
 
         if (dataset.user.id !== user.userId)
             throw new HttpException(
@@ -429,13 +457,18 @@ export class DatasetController {
         @Param('id', ParseUUIDPipe) id: string,
         @User() user: AuthorizedUserData,
     ) {
-        const dataset = await this.findById(id);
+        const dataset = await this.datasetService.findById(id);
         if (!dataset)
             throw new HttpException('Dataset not found', HttpStatus.NOT_FOUND);
         if (dataset.user.id !== user.userId)
             throw new HttpException(
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
+            );
+        if (dataset.status === DatasetStatus.ACCEPTED)
+            throw new HttpException(
+                'Cannot delete an accepted dataset',
+                HttpStatus.BAD_REQUEST,
             );
         return this.datasetService.remove(dataset);
     }

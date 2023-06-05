@@ -293,10 +293,7 @@ export class DatasetService {
             .getOne();
     }
 
-    async update(
-        dataset: Dataset,
-        attrs: Partial<UpdateDatasetDto>,
-    ): Promise<Dataset> {
+    async update(dataset: Dataset, attrs: Partial<Dataset>): Promise<Dataset> {
         Object.assign(dataset, attrs);
         return this.repo.save(dataset);
     }
