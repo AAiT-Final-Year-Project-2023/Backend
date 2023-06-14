@@ -4,43 +4,92 @@ import { Payment } from './payment.entity';
 import {
     ChapaService,
     GetBanksResponse,
+    InitializeOptions,
     InitializeResponse,
     VerifyResponse,
 } from 'chapa-nestjs';
+import { PaymentPlan } from 'src/paymentplan/paymentplan.entity';
+import { User } from 'src/user/user.entity';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
 @Injectable()
 export class PaymentService {
-    constructor(private readonly chapaService: ChapaService) {}
+    constructor(
+        @InjectRepository(Payment) private repo: Repository<Payment>,
+        private readonly chapaService: ChapaService,
+        private readonly config: ConfigService,
+    ) {}
 
-    async create(createPaymentDto: CreatePaymentDto) {
-        // get the payment plan ID
-        // get the
-
+    async initialize(
+        paymentPlan: PaymentPlan,
+        user: User,
+        body: CreatePaymentDto,
+    ) {
         const tx_ref = await this.chapaService.generateTransactionReference();
 
-        console.log('tx_ref: ', tx_ref);
+        const payment = this.repo.create({
+            tx_ref,
+            user: user.id,
+            payment_plan: paymentPlan.id,
+        });
 
-        // save this to the database
+        const callback_url = `${this.config.get<string>(
+            'PROTOCOL',
+        )}://${this.config.get<string>('HOST')}:${this.config.get<string>(
+            'PORT',
+        )}/api/payment/verify`;
 
-        const response: InitializeResponse = await this.chapaService.initialize(
-            {
-                first_name: 'John',
-                last_name: 'Doe',
-                email: 'john@gmail.com',
-                currency: 'ETB',
-                amount: '200',
-                tx_ref: tx_ref,
-                callback_url: 'https://example.com/',
-                return_url: 'https://example.com/',
-                customization: {
-                    title: 'Test Title',
-                    description: 'Test Description',
+        const headers = {
+            Authorization: `Bearer ${this.config.get<string>(
+                'PRIVATE_CHAPA_API_KEY',
+            )}`,
+            'Content-Type': 'application/json',
+        };
+
+        //  const data = {
+        //     amount: paymentPlan.price.toString().slice(2),
+        //     currency: 'ETB',
+        //     email: user.email,
+        //     phone_number: body.phone,
+        //     tx_ref,
+        //     callback_url,
+        // };
+
+        const data = {
+            amount: '100',
+            currency: 'ETB',
+            email: 'abebech_bekele@gmail.com',
+            first_name: 'Bilen',
+            last_name: 'Gizachew',
+            phone_number: '0912345678',
+            tx_ref: 'chewatatest-6669',
+            callback_url,
+            return_url: 'https://www.google.com/',
+            'customization[title]': 'Payment for my favourite merchant',
+            'customization[description]': 'I love online payments.',
+        };
+
+        console.log(data);
+
+        try {
+            const response: AxiosResponse = await axios.post(
+                'https://api.chapa.co/v1/transaction/initialize',
+                data,
+                {
+                    headers,
                 },
-            },
-        );
-
-        console.log(response);
-        return 'This action adds a new payment';
+            );
+            return response.data;
+        } catch (error) {
+            console.log((error as AxiosError).toJSON());
+            throw new HttpException(
+                error.message,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     async verify(tx_ref: string) {

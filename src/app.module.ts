@@ -45,6 +45,8 @@ import { Payment } from './payment/payment.entity';
 import { IsFutureDateConstraint } from './validations/IsFutureDate.constraint';
 import { IsValidBankIdConstraint } from './validations/IsValidBankId.constraint';
 import { IsValidBankAccountNumberConstraint } from './validations/IsValidBankAccountNumber.constraint';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
     imports: [
@@ -107,6 +109,10 @@ import { IsValidBankAccountNumberConstraint } from './validations/IsValidBankAcc
                 },
             }),
             inject: [ConfigService],
+        }),
+        ServeStaticModule.forRoot({
+            rootPath: join(__dirname, '..', 'uploads'),
+            // serveRoot: '/uploads',
         }),
         AuthModule,
         UserModule,

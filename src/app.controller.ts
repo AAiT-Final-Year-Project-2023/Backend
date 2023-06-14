@@ -1,4 +1,5 @@
 import {
+    Body,
     Controller,
     Get,
     HttpException,
@@ -18,9 +19,9 @@ import { Roles } from './decorators/roles.decorator';
 import { NotificationType, UserRole } from './common/defaults';
 import { NotificationService } from './notification/notification.service';
 import { UserService } from './user/user.service';
-import * as archiver from 'archiver';
-import * as fs from 'fs';
-import { Response } from 'express';
+import { CreatePaymentDto } from './payment/dto/create-payment.dto';
+import { PaymentplansService } from './paymentplan/paymentplan.service';
+import { PaymentService } from './payment/payment.service';
 @Controller()
 export class AppController {
     constructor(
@@ -28,6 +29,8 @@ export class AppController {
         private readonly emailService: EmailService,
         private readonly userService: UserService,
         private readonly notificaitionService: NotificationService,
+        private readonly paymentPlanService: PaymentplansService,
+        private readonly paymentService: PaymentService,
     ) {}
 
     @Get('curr-user')
@@ -38,7 +41,6 @@ export class AppController {
 
     @Public()
     @Get('test')
-    @Public()
     async getHello(
         @User() user: AuthorizedUserData,
         // @Req() req: any,
@@ -58,8 +60,26 @@ export class AppController {
         });
     }
 
+    @Post('test-accept-payment/:id')
+    async bruh(
+        @User() user: AuthorizedUserData,
+        @Body() body: CreatePaymentDto,
+        @Param('id', ParseUUIDPipe) paymentPlanId: string,
+    ) {
+        const currUser = await this.userService.findById(user.userId);
+        const paymentPlan = await this.paymentPlanService.findById(
+            paymentPlanId,
+        );
+
+        return await this.paymentService.initialize(
+            paymentPlan,
+            currUser,
+            body,
+        );
+    }
+
     @Roles(UserRole.ADMIN)
-    @Get('for-admin')
+    @Get('curr-user')
     getBye(@User() user: AuthorizedUserData) {
         return user;
     }

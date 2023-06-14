@@ -35,9 +35,9 @@ export class UpdateDatasetDto {
     @IsEnum(DataType)
     datatype: DataType;
 
-    @IsOptional()
-    @IsNotEmpty()
-    @IsNumber()
-    @Min(0)
-    price: number;
+    // @IsOptional()
+    // @IsNotEmpty()
+    // @IsNumber()
+    // @Min(0)
+    // price: number;
 }

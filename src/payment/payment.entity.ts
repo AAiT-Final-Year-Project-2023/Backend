@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsString } from 'class-validator';
+import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator';
 import { UserExists } from 'src/decorators/UserExists.decorator';
 import {
     CreateDateColumn,
@@ -19,6 +20,9 @@ export class Payment {
     @IsNotEmpty()
     @UserExists()
     user: string;
+
+    @IsValidPaymentPlan()
+    payment_plan: string;
 
     @CreateDateColumn()
     created_at: Date;

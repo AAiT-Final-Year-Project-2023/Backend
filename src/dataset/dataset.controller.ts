@@ -60,6 +60,7 @@ export class DatasetController {
         @Body() body: any,
         @User() user: AuthorizedUserData,
     ) {
+        const MAXIMUM_DATASET_SIZE = 5 * 1024 * 1024 * 1024;
         const labelsString = body.labels;
         let labelsArray = [];
         if (labelsString) {
@@ -110,13 +111,13 @@ export class DatasetController {
             );
         }
 
-        if (body.price !== 0 && !currUser.bank_information) {
-            deleteFile(path);
-            throw new HttpException(
-                'Cannot create a paid dataset without setting up bank information',
-                HttpStatus.BAD_REQUEST,
-            );
-        }
+        // if (body.price !== 0 && !currUser.bank_information) {
+        //     deleteFile(path);
+        //     throw new HttpException(
+        //         'Cannot create a paid dataset without setting up bank information',
+        //         HttpStatus.BAD_REQUEST,
+        //     );
+        // }
 
         if (mimetype !== 'application/zip') {
             deleteFile(path);
@@ -126,7 +127,7 @@ export class DatasetController {
             );
         }
 
-        if (size > paymentPlan.disk_size) {
+        if (size > MAXIMUM_DATASET_SIZE) {
             deleteFile(path);
             throw new HttpException(
                 `File size too big for the selected Payment plan`,

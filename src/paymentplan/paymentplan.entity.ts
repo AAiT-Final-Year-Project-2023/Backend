@@ -13,7 +13,9 @@ export class PaymentPlan {
     @Column()
     description: string;
 
-    @Column()
+    @Column({
+        type: 'bigint',
+    })
     disk_size: number;
 
     @Column({ type: 'money' })

@@ -160,7 +160,7 @@ export class RequestpostService {
                         searchString: `%${search.trim()}%`,
                     },
                 );
-                
+
         const count = await query.getCount();
 
         if (limit) {
@@ -316,19 +316,7 @@ export class RequestpostService {
         );
 
         await this.repo.save(requestPost);
-        return this.repo
-            .createQueryBuilder('request_post')
-            .leftJoinAndSelect('request_post.user', 'user')
-            .leftJoinAndSelect('request_post.upvoted_by', 'upvoted_user')
-            .leftJoinAndSelect('request_post.downvoted_by', 'downvoted_user')
-            .where('request_post.id = :id', { id })
-            .select([
-                'request_post.id',
-                'user.id',
-                'upvoted_user.id',
-                'downvoted_user.id',
-            ])
-            .getOne();
+        return this.findById(requestPost.id);
     }
 
     async downvote(id: string, user: User): Promise<RequestPost> {
@@ -386,19 +374,7 @@ export class RequestpostService {
         );
 
         await this.repo.save(requestPost);
-        return this.repo
-            .createQueryBuilder('request_post')
-            .leftJoinAndSelect('request_post.user', 'user')
-            .leftJoinAndSelect('request_post.upvoted_by', 'upvoted_user')
-            .leftJoinAndSelect('request_post.downvoted_by', 'downvoted_user')
-            .where('request_post.id = :id', { id })
-            .select([
-                'request_post.id',
-                'user.id',
-                'upvoted_user.id',
-                'downvoted_user.id',
-            ])
-            .getOne();
+        return this.findById(requestPost.id);
     }
 
     async diskUsage(

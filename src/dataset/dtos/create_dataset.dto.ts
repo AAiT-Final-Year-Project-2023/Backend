@@ -13,10 +13,10 @@ import { DataType } from 'src/common/defaults';
 import { IsValidPaymentPlan } from 'src/decorators/IsValidPaymentPlan.decorator';
 
 export class CreateDatasetDto {
-    @IsNotEmpty()
-    @IsUUID()
-    @IsValidPaymentPlan()
-    payment_plan: string;
+    // @IsNotEmpty()
+    // @IsUUID()
+    // @IsValidPaymentPlan()
+    // payment_plan: string;
 
     @IsNotEmpty()
     @IsString()
@@ -37,8 +37,8 @@ export class CreateDatasetDto {
     @IsEnum(DataType)
     datatype: DataType;
 
-    @IsNotEmpty()
-    @IsNumber()
-    @IsPositive()
-    price: number;
+    // @IsNotEmpty()
+    // @IsNumber()
+    // @IsPositive()
+    // price: number;
 }

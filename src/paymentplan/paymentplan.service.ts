@@ -12,7 +12,7 @@ export class PaymentplansService {
     ) {}
 
     async create(paymentplan: CreatePaymentplanDto): Promise<PaymentPlan> {
-        const newPaymentPlan = await this.repo.create(paymentplan);
+        const newPaymentPlan = this.repo.create(paymentplan);
         return this.repo.save(newPaymentPlan);
     }
 
