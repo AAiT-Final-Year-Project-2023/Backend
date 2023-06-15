@@ -214,21 +214,7 @@ export class DatasetService {
         );
 
         await this.repo.save(dataset);
-        return this.repo
-            .createQueryBuilder('dataset')
-            .leftJoinAndSelect('dataset.user', 'user')
-            .leftJoinAndSelect('dataset.upvoted_by', 'upvoted_user')
-            .leftJoinAndSelect('dataset.downvoted_by', 'downvoted_user')
-            .where('dataset.id = :id', { id })
-            .select([
-                'dataset.id',
-                'user.id',
-                'upvoted_user.username',
-                'upvoted_user.id',
-                'downvoted_user.id',
-                'downvoted_user.username',
-            ])
-            .getOne();
+        return this.findById(dataset.id); 
     }
 
     async downvote(id: string, user: User): Promise<Dataset> {
@@ -276,21 +262,7 @@ export class DatasetService {
         );
 
         await this.repo.save(dataset);
-        return this.repo
-            .createQueryBuilder('dataset')
-            .leftJoinAndSelect('dataset.user', 'user')
-            .leftJoinAndSelect('dataset.upvoted_by', 'upvoted_user')
-            .leftJoinAndSelect('dataset.downvoted_by', 'downvoted_user')
-            .where('dataset.id = :id', { id })
-            .select([
-                'dataset.id',
-                'user.id',
-                'upvoted_user.username',
-                'upvoted_user.id',
-                'downvoted_user.id',
-                'downvoted_user.username',
-            ])
-            .getOne();
+        return this.findById(dataset.id); 
     }
 
     async update(dataset: Dataset, attrs: Partial<Dataset>): Promise<Dataset> {

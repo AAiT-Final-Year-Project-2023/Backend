@@ -51,7 +51,7 @@ export class Dataset {
     })
     datatype: DataType;
 
-    @Column({ type: 'money' })
+    @Column({ type: 'money', default: 0 })
     price: number;
 
     @ManyToMany(() => User, (user) => user.purchased_datasets)

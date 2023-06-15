@@ -278,19 +278,19 @@ export class DatasetController {
         if (!dataset)
             throw new HttpException('Dataset not found', HttpStatus.NOT_FOUND);
 
-        let hasPurchased = false;
-        if (dataset.purchased_by) {
-            hasPurchased =
-                dataset.purchased_by.filter(
-                    (ownerUser) => ownerUser.id === user.userId,
-                ).length > 0;
-        }
+        // let hasPurchased = false;
+        // if (dataset.purchased_by) {
+        //     hasPurchased =
+        //         dataset.purchased_by.filter(
+        //             (ownerUser) => ownerUser.id === user.userId,
+        //         ).length > 0;
+        // }
 
-        if (dataset.price.toString() !== 'ብር0.00' && !hasPurchased)
-            throw new HttpException(
-                'Cannot upvote an unpurchased dataset',
-                HttpStatus.UNAUTHORIZED,
-            );
+        // if (dataset.price.toString() !== 'ብር0.00' && !hasPurchased)
+        //     throw new HttpException(
+        //         'Cannot upvote an unpurchased dataset',
+        //         HttpStatus.UNAUTHORIZED,
+        //     );
 
         const toUser = dataset.user;
         const upvotedDataset = await this.datasetService.upvote(
@@ -323,19 +323,19 @@ export class DatasetController {
         if (!dataset)
             throw new HttpException('Dataset not found', HttpStatus.NOT_FOUND);
 
-        let hasPurchased = false;
-        if (dataset.purchased_by) {
-            hasPurchased =
-                dataset.purchased_by.filter(
-                    (ownerUser) => ownerUser.id === user.userId,
-                ).length > 0;
-        }
+        // let hasPurchased = false;
+        // if (dataset.purchased_by) {
+        //     hasPurchased =
+        //         dataset.purchased_by.filter(
+        //             (ownerUser) => ownerUser.id === user.userId,
+        //         ).length > 0;
+        // }
 
-        if (dataset.price.toString() !== 'ብር0.00' && !hasPurchased)
-            throw new HttpException(
-                'Cannot upvote an unpurchased dataset',
-                HttpStatus.UNAUTHORIZED,
-            );
+        // if (dataset.price.toString() !== 'ብር0.00' && !hasPurchased)
+        //     throw new HttpException(
+        //         'Cannot upvote an unpurchased dataset',
+        //         HttpStatus.UNAUTHORIZED,
+        //     );
 
         const toUser = dataset.user;
         const downvotedDataset = await this.datasetService.downvote(
@@ -374,17 +374,17 @@ export class DatasetController {
             );
 
         let hasPurchased = false;
-        if (dataset.purchased_by) {
-            hasPurchased =
-                dataset.purchased_by.filter(
-                    (ownerUser) => ownerUser.id === user.userId,
-                ).length > 0;
-        }
-        if (!hasPurchased && !user.role.includes(UserRole.ADMIN))
-            throw new HttpException(
-                'Cannot download an unpurchased dataset',
-                HttpStatus.BAD_REQUEST,
-            );
+        // if (dataset.purchased_by) {
+        //     hasPurchased =
+        //         dataset.purchased_by.filter(
+        //             (ownerUser) => ownerUser.id === user.userId,
+        //         ).length > 0;
+        // }
+        // if (!hasPurchased && !user.role.includes(UserRole.ADMIN))
+        //     throw new HttpException(
+        //         'Cannot download an unpurchased dataset',
+        //         HttpStatus.BAD_REQUEST,
+        //     );
 
         const datasetFileName = `[${dataset.title}] by user: [${dataset?.user?.username}].zip`;
 
@@ -466,11 +466,11 @@ export class DatasetController {
                 'User not authorized',
                 HttpStatus.UNAUTHORIZED,
             );
-        if (dataset.status === DatasetStatus.ACCEPTED)
-            throw new HttpException(
-                'Cannot delete an accepted dataset',
-                HttpStatus.BAD_REQUEST,
-            );
+        // if (dataset.status === DatasetStatus.ACCEPTED)
+        //     throw new HttpException(
+        //         'Cannot delete an accepted dataset',
+        //         HttpStatus.BAD_REQUEST,
+        //     );
         return this.datasetService.remove(dataset);
     }
 }
