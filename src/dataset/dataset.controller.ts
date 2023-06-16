@@ -71,8 +71,9 @@ export class DatasetController {
             .map((label: String) => label.trim());
         body.labels = labelsArray;
 
-        const price = parseInt(body.price);
-        body.price = isNaN(price) ? body.price : price;
+        // const price = parseInt(body.price);
+        // body.price = isNaN(price) ? body.price : price;
+        const price = 0;
 
         const bodyInstance = plainToInstance(CreateDatasetDto, body);
         const errors = await validate(bodyInstance);
@@ -100,13 +101,11 @@ export class DatasetController {
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
-        const paymentPlan = await this.paymentPlanService.findById(
-            body.payment_plan,
-        );
+        const paymentPlan = await this.paymentPlanService.findFree();
         if (!paymentPlan) {
             deleteFile(path);
             throw new HttpException(
-                'Payment plan not found',
+                'Free payment plan not found',
                 HttpStatus.NOT_FOUND,
             );
         }

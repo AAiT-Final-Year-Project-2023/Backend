@@ -590,7 +590,7 @@ export class RequestpostController {
         const labels = {};
         contributions.results.forEach((contribution) => {
             const label = contribution.data.label;
-            labels[contribution.id] = label;
+            labels[contribution.data.src] = label;
         });
 
         res.attachment(`${requestPostName}`);

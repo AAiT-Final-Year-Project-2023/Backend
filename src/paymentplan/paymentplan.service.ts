@@ -24,6 +24,12 @@ export class PaymentplansService {
         return this.repo.findOne({ where: { id } });
     }
 
+    async findFree(): Promise<PaymentPlan> {
+        return this.repo.findOne({ where: {
+            price: 0
+        }})
+    }
+
     async update(
         id: string,
         attrs: Partial<PaymentPlan>,
