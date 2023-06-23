@@ -22,6 +22,8 @@ async function bootstrap() {
 
     await app
         .listen(port || 3000)
-        .then(async (_) => console.log(`Server running on ${await app.getUrl()} ☁ 🚀 ...`));
+        .then(async (_) =>
+            console.log(`Server running on ${await app.getUrl()} ☁ 🚀 ...`),
+        );
 }
 bootstrap();

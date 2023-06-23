@@ -118,7 +118,11 @@ export class DatasetController {
         //     );
         // }
 
-        if (mimetype !== 'application/zip') {
+        const zipFileHeaders = [
+            'application/zip',
+            'application/x-zip-compressed',
+        ];
+        if (!zipFileHeaders.includes(mimetype)) {
             deleteFile(path);
             throw new HttpException(
                 'Unsupported file format. Only zip files are supported.',
@@ -236,7 +240,10 @@ export class DatasetController {
             throw new HttpException('User not fount', HttpStatus.NOT_FOUND);
 
         if (status && status !== DatasetStatus.ACCEPTED) {
-            if (!owner || (owner && owner !== Owner.ME)) {
+            if (
+                (!currUser.roles.includes(UserRole.ADMIN) && !owner) ||
+                (owner && owner !== Owner.ME)
+            ) {
                 throw new HttpException(
                     'Not authorized to access Datasets that are not public and are not yours',
                     HttpStatus.UNAUTHORIZED,
@@ -421,6 +428,8 @@ export class DatasetController {
         const dataset = await this.datasetService.findById(id);
         if (!dataset)
             throw new HttpException('Datset not found', HttpStatus.NOT_FOUND);
+
+        deleteFile(dataset.src);
         return this.datasetService.update(dataset, {
             status: DatasetStatus.REJECTED,
         });

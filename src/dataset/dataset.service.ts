@@ -97,11 +97,13 @@ export class DatasetService {
                 status,
             });
         } else if (userId) {
-            query.where('user.id = :userId', { userId });
+            query.andWhere('user.id = :userId', { userId });
         } else {
-            query.where('dataset.status = :status', {
-                status: DatasetStatus.ACCEPTED,
-            });
+            if (status) {
+                query.andWhere('dataset.status = :status', {
+                    status,
+                });
+            }
         }
 
         if (datatype && datatype !== DataTypeFilter.ALL) {
@@ -214,7 +216,7 @@ export class DatasetService {
         );
 
         await this.repo.save(dataset);
-        return this.findById(dataset.id); 
+        return this.findById(dataset.id);
     }
 
     async downvote(id: string, user: User): Promise<Dataset> {
@@ -262,7 +264,7 @@ export class DatasetService {
         );
 
         await this.repo.save(dataset);
-        return this.findById(dataset.id); 
+        return this.findById(dataset.id);
     }
 
     async update(dataset: Dataset, attrs: Partial<Dataset>): Promise<Dataset> {

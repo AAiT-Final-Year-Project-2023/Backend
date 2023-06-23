@@ -25,9 +25,11 @@ export class PaymentplansService {
     }
 
     async findFree(): Promise<PaymentPlan> {
-        return this.repo.findOne({ where: {
-            price: 0
-        }})
+        return this.repo.findOne({
+            where: {
+                price: 0,
+            },
+        });
     }
 
     async update(
